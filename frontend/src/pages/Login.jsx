@@ -52,7 +52,7 @@ const Login = () => {
       localStorage.setItem("token", data.token);
 
       // REDIRECT
-      navigateto("/");
+      navigateto("/explore");
     } catch (err) {
       setError("Something went wrong",err);
     }
