@@ -8,7 +8,7 @@ const SidePanel = () => {
   return (
     <aside className="fixed top-16 left-0 bottom-0 w-64 bg-gray-900 text-gray-100 shadow-lg">
       <div className="pt-5 pb-5">
-        <h3 className="text-sm uppercase tracking-wider text-gray-400 mb-6">
+        <h3 className="text-sm uppercase tracking-wider text-gray-400 mb-6 mx-4">
           Navigation
         </h3>
 
@@ -37,6 +37,15 @@ const SidePanel = () => {
               className={({ isActive }) =>
                 `${linkClass} ${ isActive? "bg-indigo-600 text-white": "hover:bg-gray-800"}`}>
               Post Items
+            </NavLink>
+          </li>
+
+           <li>
+            <NavLink
+              to="/chat"
+              className={({ isActive }) =>
+                `${linkClass} ${ isActive? "bg-indigo-600 text-white": "hover:bg-gray-800"}`}>
+              Chats
             </NavLink>
           </li>
 
