@@ -7,7 +7,7 @@ function Home() {
     <>
       <Header />
       <SidePanel />
-      <main className="ml-64 pt-4 p-4">
+      <main className="ml-64 pt-18 p-4">
         <Outlet />
       </main>
     </>
