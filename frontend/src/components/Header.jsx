@@ -1,4 +1,4 @@
-import { HiMenu } from "react-icons/hi";
+import { MdLogout } from "react-icons/md";
 import { IoNotificationsSharp } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 
@@ -18,7 +18,7 @@ const Header = () => {
 
       <div className="flex items-center gap-5">
         <IoNotificationsSharp className="text-2xl text-gray-600 hover:text-indigo-600 cursor-pointer" />
-        <HiMenu
+        <MdLogout
           className="text-2xl text-gray-600 hover:text-red-500 cursor-pointer"
           onClick={Logout}
         />
