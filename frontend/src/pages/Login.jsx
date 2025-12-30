@@ -1,62 +1,33 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../auth/useAuth";
 
 const Login = () => {
-  const navigateto = useNavigate();
+  const navigate = useNavigate();
+  const { login, error } = useAuth();
 
-  const [form, setForm] = useState({
-    email: "",
-    password: "",
-  });
+  const [form, setForm] = useState({ email: "", password: "" });
+  const [localError, setLocalError] = useState("");
 
-  const [error, setError] = useState("");
-
-  // HANDLE INPUTS
   const handleChange = (e) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  // HANDLE SUBMIT
   const handleSubmit = async (e) => {
-    e.preventDefault(); // stop page refresh
-    setError("");
-  
+    e.preventDefault();
+    setLocalError("");
 
-    // simple validation
     if (!form.email || !form.password) {
-      setError("Please fill all fields");
+      setLocalError("All fields must be filled");
       return;
     }
 
     try {
-      // CALL API
-      const response = await fetch("http://localhost:5000/api/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(form),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.message || "Invalid username or password");
-        return;
-      }
-
-      // STORE TOKEN
-      localStorage.setItem("token", data.token);
-
-      // REDIRECT
-      navigateto("/explore");
-    } catch (err) {
-      setError("Something went wrong",err);
+      await login(form);
+      navigate("/explore");
+    } catch {
+      // context error is already updated and displayed
     }
-
   };
 
   return (
@@ -64,17 +35,23 @@ const Login = () => {
       <div className="w-full max-w-md bg-white p-8 rounded-xl shadow-lg">
         <h2 className="text-3xl font-bold text-center mb-6">Log-in</h2>
 
-        {/* Error message */}
+        {/* Validation error */}
+        {localError && (
+          <p className="mb-4 text-red-600 text-center font-semibold">
+            {localError}
+          </p>
+        )}
+
+        {/* Backend error */}
         {error && (
           <p className="mb-4 text-red-600 text-center font-semibold">{error}</p>
         )}
 
         <form onSubmit={handleSubmit}>
-          {/* Email */}
           <div className="mb-4">
-            <label className="text-xl mb-1 block">E-mail : </label>
+            <label className="text-xl mb-1 block">E-mail:</label>
             <input
-              type="text"
+              type="email"
               name="email"
               value={form.email}
               onChange={handleChange}
@@ -83,9 +60,8 @@ const Login = () => {
             />
           </div>
 
-          {/* Password */}
           <div className="mb-4">
-            <label className="text-xl mb-1 block">Password : </label>
+            <label className="text-xl mb-1 block">Password:</label>
             <input
               type="password"
               name="password"
@@ -96,22 +72,18 @@ const Login = () => {
             />
           </div>
 
-          {/* Submit button */}
-          <div className="mb-4">
-            <button
-              className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition text-xl cursor-pointer"
-              type="submit"
-            >
-               Login
-            </button>
-          </div>
+          <button
+            type="submit"
+            className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition text-xl"
+          >
+            Login
+          </button>
 
-          {/* Register link */}
-          <div className="mb-4 text-center">
+          <div className="mt-4 text-center">
             <p className="text-stone-500">
-              Don't have an account?
+              Don't have an account?{" "}
               <span
-                onClick={() => navigateto("/register")}
+                onClick={() => navigate("/register")}
                 className="cursor-pointer text-blue-600 underline ml-1"
               >
                 Register
