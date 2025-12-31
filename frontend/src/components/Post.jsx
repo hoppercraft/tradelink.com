@@ -1,14 +1,22 @@
-import React from "react";
+import React, { useState } from "react";
 import { useRef } from "react";
 
 const Post = () => {
  const textareaRef = useRef(null);
+ const fileInputRef =useRef(null);
+
+ const [image,setImage]=useState();
+ const [description,setDescription]=useState();
+ const [price,setPrice]=useState();
+ const [preview,setPriview]=useState();
 
   const autoResize = () => {
     const size = textareaRef.current;
     size.style.height = "auto";
     size.style.height = size.scrollHeight + "px";
   };
+
+  //code for api connection
 
   return (
     <div className="min-h-[88vh] flex items-center justify-center bg-gray-100">

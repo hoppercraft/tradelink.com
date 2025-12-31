@@ -1,21 +1,13 @@
 
 import {RouterProvider } from "react-router-dom"
 import router from "./components/router"
-
-function RegisterAndLogout() {
-  localStorage.clear()
-  return <Register />
-}
-
-function Logout() {
-  localStorage.clear()
-  return <Navigate to="/login" />
-}
-
+import { Authprovider } from "./auth/auth"
 
 function App() {
   return (
+    <Authprovider>
  <RouterProvider router={router}/>
+ </Authprovider>
   )
 }
 
