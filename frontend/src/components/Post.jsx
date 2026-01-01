@@ -6,9 +6,9 @@ const Post = () => {
  const fileInputRef =useRef(null);
 
  const [image,setImage]=useState(null);
- const [description,setDescription]=useState(null);
+ const [description,setDescription]=useState("");
  const [price,setPrice]=useState("");
- const [preview,setPreview]=useState("");
+ const [preview,setPreview]=useState(null);
 
   const autoResize = () => {
     const size = textareaRef.current;
@@ -24,7 +24,7 @@ const Post = () => {
   }
 
   const changeImage=(e)=>{
-      const file=e.target.file[0];
+      const file=e.target.files[0];
       if(!file)return;
       setImage(file);
        setPreview(URL.createObjectURL(file));
@@ -42,12 +42,12 @@ const Post = () => {
         {/* Image upload */}
         <div className="flex items-center gap-6">
           <div className="h-32 w-32 rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400 text-sm">
-            <img src={preview} alt="photo" srcset="" />
+            <img src={preview} alt="photo" className="w-full h-full rounded-xl"/>
           </div>
           <button className="px-6 py-3 text-base bg-gray-800 text-white rounded-xl hover:bg-gray-700 cursor-pointer" onClick={chooseImage}>
             Choose Image
           </button>
-                       <input type="file" accept="image" hidden ref={fileInputRef} onChange={changeImage}/>
+                       <input type="file" accept="image/*" hidden ref={fileInputRef} onChange={changeImage}/>
         </div>
 
         
