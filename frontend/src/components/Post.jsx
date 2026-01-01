@@ -5,16 +5,30 @@ const Post = () => {
  const textareaRef = useRef(null);
  const fileInputRef =useRef(null);
 
- const [image,setImage]=useState();
- const [description,setDescription]=useState();
- const [price,setPrice]=useState();
- const [preview,setPriview]=useState();
+ const [image,setImage]=useState(null);
+ const [description,setDescription]=useState(null);
+ const [price,setPrice]=useState("");
+ const [preview,setPreview]=useState("");
 
   const autoResize = () => {
     const size = textareaRef.current;
     size.style.height = "auto";
     size.style.height = size.scrollHeight + "px";
   };
+
+  const Form=new FormData();
+
+
+  const chooseImage=()=>{
+      fileInputRef.current.click();
+  }
+
+  const changeImage=(e)=>{
+      const file=e.target.file[0];
+      if(!file)return;
+      setImage(file);
+       setPreview(URL.createObjectURL(file));
+  }
 
   //code for api connection
 
@@ -28,12 +42,15 @@ const Post = () => {
         {/* Image upload */}
         <div className="flex items-center gap-6">
           <div className="h-32 w-32 rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400 text-sm">
-            <img src="" alt="photo" srcset="" />
+            <img src={preview} alt="photo" srcset="" />
           </div>
-          <button className="px-6 py-3 text-base bg-gray-800 text-white rounded-xl hover:bg-gray-700 cursor-pointer">
+          <button className="px-6 py-3 text-base bg-gray-800 text-white rounded-xl hover:bg-gray-700 cursor-pointer" onClick={chooseImage}>
             Choose Image
           </button>
+                       <input type="file" accept="image" hidden ref={fileInputRef} onChange={changeImage}/>
         </div>
+
+        
 
         {/* Description */}
         <div className="flex flex-col gap-2">
