@@ -1,14 +1,15 @@
 import React, { useState } from "react";
 import { useRef } from "react";
+import { ACCESS_TOKEN } from "../constants";
 
 const Post = () => {
- const textareaRef = useRef(null);
- const fileInputRef =useRef(null);
+  const textareaRef = useRef(null);
+  const fileInputRef = useRef(null);
 
- const [image,setImage]=useState();
- const [description,setDescription]=useState();
- const [price,setPrice]=useState();
- const [preview,setPriview]=useState();
+  const [image, setImage] = useState(null);
+  const [description, setDescription] = useState("");
+  const [price, setPrice] = useState("");
+  const [preview, setPreview] = useState(null);
 
   const autoResize = () => {
     const size = textareaRef.current;
@@ -16,7 +17,34 @@ const Post = () => {
     size.style.height = size.scrollHeight + "px";
   };
 
-  //code for api connection
+  const chooseImage = () => {
+    fileInputRef.current.click();
+  }
+
+  const changeImage = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setImage(file);
+    setPreview(URL.createObjectURL(file));
+  }
+
+  const submit = async () => {
+    const token = localStorage.getItem(ACCESS_TOKEN);
+    if(!token)return;
+    const form_data = new FormData();
+    form_data.append("image", image);
+    form_data.append("price", price);
+    form_data.append("description", description);
+
+
+    await fetch("/api/upload/", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`
+      },
+      body: form_data
+    });
+  }
 
   return (
     <div className="min-h-[88vh] flex items-center justify-center bg-gray-100">
@@ -27,13 +55,16 @@ const Post = () => {
 
         {/* Image upload */}
         <div className="flex items-center gap-6">
-          <div className="h-32 w-32 rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400 text-sm">
-            <img src="" alt="photo" srcset="" />
+          <div className="h-34 w-34 rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400 text-sm">
+            <img src={preview} alt="preview" className="w-full h-full rounded-xl" />
           </div>
-          <button className="px-6 py-3 text-base bg-gray-800 text-white rounded-xl hover:bg-gray-700 cursor-pointer">
+          <button className="px-6 py-3 text-base bg-gray-800 text-white rounded-xl hover:bg-gray-700 cursor-pointer" onClick={chooseImage}>
             Choose Image
           </button>
+          <input type="file" accept="image/*" hidden ref={fileInputRef} onChange={changeImage} />
         </div>
+
+
 
         {/* Description */}
         <div className="flex flex-col gap-2">
@@ -43,8 +74,12 @@ const Post = () => {
           <textarea
             ref={textareaRef}
             rows={2}
-            onChange={autoResize}
+            onChange={(e) => {
+              setDescription(e.target.value);
+              autoResize();
+            }}
             placeholder="Enter description"
+            value={description}
             className="border  border-gray-300  resize-none rounded-xl px-4 py-3 overflow-hidden text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
@@ -55,12 +90,16 @@ const Post = () => {
           <input
             type="text"
             placeholder="e.g. 1200"
+            value={price}
+            onChange={(e) => {
+              setPrice(e.target.value);
+            }}
             className="border  border-gray-300  rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
         {/* Post button */}
-        <button className="w-full py-3 text-lg bg-amber-600 text-white rounded-xl font-semibold hover:bg-amber-700 cursor-pointer">
+        <button className="w-full py-3 text-lg bg-amber-600 text-white rounded-xl font-semibold hover:bg-amber-700 cursor-pointer" onClick={submit}>
           Post
         </button>
       </div>
