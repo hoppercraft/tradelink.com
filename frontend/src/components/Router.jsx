@@ -23,6 +23,8 @@ const router=createBrowserRouter(
               // </ProtectedRoute> 
           }
         />
+        {/* Dev-only: direct access to homepage UI without auth */}
+        <Route path="/dev-home" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="*" element={<NotFound />}></Route>
