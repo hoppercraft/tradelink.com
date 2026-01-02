@@ -126,7 +126,7 @@ const Register = () => {
       <div className="relative z-10 w-full max-w-md backdrop-blur-xl bg-white/10 border border-white/10 p-8 rounded-2xl shadow-2xl text-white">
         
         <h1 className="text-4xl font-extrabold text-center tracking-wide">
-          TRADE<span className="text-indigo-400">LiNK</span>
+          TRADE<span className="text-indigo-600">LiNK</span>
         </h1>
         <p className="text-center text-gray-300 mt-1 mb-6">
           Create your account
@@ -176,7 +176,7 @@ const Register = () => {
 
           <button
             type="submit"
-            className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 transition font-semibold text-lg shadow-lg"
+            className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 transition font-semibold text-lg shadow-lg cursor-pointer"
           >
             Register
           </button>

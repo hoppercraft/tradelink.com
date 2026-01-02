@@ -1,12 +1,14 @@
 import { MdLogout } from "react-icons/md";
 import { IoNotificationsSharp,IoSearch } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../auth/useAuth";
 
 const Header = () => {
   const navigate = useNavigate();
+  const {logout}=useAuth();
 
-  const Logout = () => {
-    localStorage.clear();
+  const Logout = async() => {
+    await logout();
     navigate("/login");
   };
 
@@ -24,7 +26,7 @@ const Header = () => {
           placeholder="Search products..."
           className="flex-1 px-3 py-1.5 h-10 rounded-l-full border border-gray-300 shadow-sm focus:outline-none focus:ring-1 focus:ring-indigo-400 transition"
         />
-        <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-r-full transition h-10">
+        <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-r-full transition h-10 cursor-pointer">
           <IoSearch className="text-lg " />
         </button>
       </div>
