@@ -1,5 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import api from "../api";
+import { ACCESS_TOKEN, REFRESH_TOKEN } from "../constants";
 import { useAuth } from "../auth/useAuth";
 
 const Login = () => {
@@ -23,10 +25,18 @@ const Login = () => {
     }
 
     try {
-      await login(form);
+      const res = await api.post("/api/token/", {
+        username: form.email,
+        password: form.password,
+      });
+
+      
+      localStorage.setItem(ACCESS_TOKEN, res.data.access);
+      localStorage.setItem(REFRESH_TOKEN, res.data.refresh);
+
       navigate("/explore");
-    } catch {
-      //
+    } catch (err) {
+      setError(err.response?.data?.detail || "Invalid email or password");
     }
   };
 

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
+import api from "../api"
 import { useRef } from "react";
-import { ACCESS_TOKEN } from "../constants";
+import { ACCESS_TOKEN, REFRESH_TOKEN } from "../constants";
 
 const Post = () => {
   const textareaRef = useRef(null);
