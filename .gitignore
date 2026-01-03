@@ -18,11 +18,15 @@ build/
 *.log
 db.sqlite3
 db.sqlite3-journal
+*.db
+*.sqlite
 /media
 /staticfiles
 .env
 *.env
 !frontend/.env
+local_settings.py
+migrations/__pycache__/
 
 # Node
 node_modules/
