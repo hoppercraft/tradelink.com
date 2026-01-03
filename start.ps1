@@ -3,6 +3,15 @@
 
 Write-Host "Starting TradeLink..." -ForegroundColor Green
 
+# Run database migrations first
+Write-Host "Checking database migrations..." -ForegroundColor Yellow
+cd "$PSScriptRoot\backend"
+& ..\env\Scripts\python manage.py migrate --no-input
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "Migration failed! Please check the error above." -ForegroundColor Red
+    exit 1
+}
+
 # Start Backend in new window
 Write-Host "Starting Django backend..." -ForegroundColor Cyan
 Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$PSScriptRoot'; .\env\Scripts\Activate.ps1; cd backend; python manage.py runserver"
