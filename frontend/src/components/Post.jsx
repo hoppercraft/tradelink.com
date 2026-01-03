@@ -1,11 +1,12 @@
 import React, { useState } from "react";
+import api from "../api"
 import { useRef } from "react";
-import { ACCESS_TOKEN } from "../constants";
+import { ACCESS_TOKEN, REFRESH_TOKEN } from "../constants";
 
 const Post = () => {
   const textareaRef = useRef(null);
   const fileInputRef = useRef(null);
-
+  const [item_name, setItemName] = useState("");
   const [image, setImage] = useState(null);
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
@@ -32,19 +33,27 @@ const Post = () => {
     const token = localStorage.getItem(ACCESS_TOKEN);
     if(!token)return;
     const form_data = new FormData();
+    form_data.append("name", item_name);
     form_data.append("image", image);
     form_data.append("price", price);
     form_data.append("description", description);
 
 
-    await fetch("/api/upload/", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`
-      },
-      body: form_data
-    });
-  }
+   try {
+      const res = await api.post("/api/items/", form_data, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (res.status === 201) {
+        alert("Item posted successfully!");
+      }
+    } catch (err) {
+      console.error("Upload error:", err);
+      alert("Failed to upload item. Check if your Django server is running.");
+    }
+  };
 
   return (
     <div className="min-h-[88vh] flex items-center justify-center bg-gray-100">
@@ -64,6 +73,20 @@ const Post = () => {
           <input type="file" accept="image/*" hidden ref={fileInputRef} onChange={changeImage} />
         </div>
 
+
+      {/* Name */}
+        <div className="flex flex-col gap-2">
+          <label className="text-base text-gray-800">Item Name</label>
+          <input
+            type="text"
+            placeholder="Item Name"
+            value={item_name}
+            onChange={(e) => {
+              setItemName(e.target.value);
+            }}
+            className="border  border-gray-300  rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
 
 
         {/* Description */}

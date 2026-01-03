@@ -1,12 +1,14 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import api from "../api";
+import { ACCESS_TOKEN, REFRESH_TOKEN } from "../constants";
 import { useAuth } from "../auth/useAuth";
 
 const Login = () => {
   const navigate = useNavigate();
   const { login, error } = useAuth();
 
-  const [form, setForm] = useState({ email: "", password: "" });
+  const [form, setForm] = useState({ username: "", password: "" });
   const [localError, setLocalError] = useState("");
 
   const handleChange = (e) => {
@@ -14,21 +16,32 @@ const Login = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLocalError("");
+  e.preventDefault();
+  setLocalError(""); // Clear previous errors
 
-    if (!form.email || !form.password) {
-      setLocalError("All fields must be filled");
-      return;
-    }
+  if (!form.username || !form.password) {
+    setLocalError("All fields must be filled");
+    return;
+  }
 
-    try {
-      await login(form);
-      navigate("/explore");
-    } catch {
-      //
-    }
-  };
+  try {
+    const res = await api.post("/api/token/", {
+      username: form.username,
+      password: form.password,
+    });
+
+    // Save tokens to memory
+    localStorage.setItem(ACCESS_TOKEN, res.data.access);
+    localStorage.setItem(REFRESH_TOKEN, res.data.refresh);
+
+    // Redirect
+    navigate("/explore");
+  } catch (err) {
+    // FIX: Use setLocalError instead of setError
+    const message = err.response?.data?.detail || "Invalid username or password";
+    setLocalError(message);
+  }
+};
 
   return (
     <div className="min-h-screen w-screen flex items-center justify-center bg-gradient-to-br from-indigo-900 via-indigo-950 to-gray-950 relative overflow-hidden">
@@ -131,14 +144,14 @@ const Login = () => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm mb-1 text-gray-300">E-mail</label>
+            <label className="block text-sm mb-1 text-gray-300">Username</label>
             <input
-              type="email"
-              name="email"
-              value={form.email}
+              type="text"
+              name="username"
+              value={form.username}
               onChange={handleChange}
               className="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-600"
-              placeholder="you@example.com"
+              placeholder="username"
             />
           </div>
 

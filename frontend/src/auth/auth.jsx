@@ -67,9 +67,21 @@ export const Authprovider = ({ children }) => {
     setIsAuthenticated(false);
   };
 
+  const updateUser = async (payload) => {
+  const res = await fetch("/api/profile", {
+    method: "PUT",
+    credentials: "include",
+    body: payload  
+  });
+
+  if (!res.ok) return;
+  const updatedUser = await res.json();
+  setUser(updatedUser);
+};
+
   return (
     <AuthContext.Provider
-      value={{ user, isAuthenticated, loading, error, login, logout }}
+      value={{ user, isAuthenticated, loading, error, login, logout,updateUser }}
     >
       {children}
     </AuthContext.Provider>
