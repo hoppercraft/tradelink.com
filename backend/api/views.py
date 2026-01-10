@@ -11,6 +11,7 @@ from .models import Item
 class ItemListCreate(generics.ListCreateAPIView):
     serializer_class=ItemSerializer
     permission_classes = [IsAuthenticated]
+    
 
     def get_queryset(self):
         user = self.request.user
