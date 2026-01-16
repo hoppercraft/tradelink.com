@@ -1,12 +1,19 @@
-import React from "react";
+import React, { useState } from "react";
+import ProductPopup from "./ProductPopup";
 
 const Card = ({ product }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   return (
-    <div className="w-72 rounded-xl overflow-hidden bg-white shadow-md hover:shadow-xl transition">
-      <div className="h-44 bg-gray-100 relative group">
+    <>
+      <div 
+        className="w-72 rounded-xl overflow-hidden bg-white shadow-md hover:shadow-xl transition cursor-pointer"
+        onClick={() => setIsModalOpen(true)}
+      >
+        <div className="h-44 bg-gray-100 relative group">
         <img
           src={product.image}
-          alt={product.title}
+          alt={product.item_name}
           className="h-full w-full object-cover"
         />
         {/* Hover Overlay with Description */}
@@ -28,24 +35,41 @@ const Card = ({ product }) => {
 
         <div className="flex items-center justify-between pt-2">
           <div className="flex items-center gap-2">
-            <div className="h-10 w-10 rounded-full overflow-hidden border">
-              <img
-                src={product.seller.avatar}
-                alt={product.seller.username}
-                className="h-full w-full object-cover"
-              />
-            </div>
-            <span className="text-sm font-medium text-gray-700">
-              @{product.seller.username}
-            </span>
+            {product.owner && (
+              <>
+                <div className="h-10 w-10 rounded-full overflow-hidden border">
+                  <img
+                    src={product.owner.avatar || "https://via.placeholder.com/40"}
+                    alt={product.owner.username}
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+                <span className="text-sm font-medium text-gray-700">
+                  @{product.owner.username}
+                </span>
+              </>
+            )}
           </div>
 
-          <button className="px-4 py-1.5 text-sm font-medium rounded-lg bg-indigo-600 text-white hover:bg-indigo-700">
+          <button 
+            className="px-4 py-1.5 text-sm font-medium rounded-lg bg-indigo-600 text-white hover:bg-indigo-700"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsModalOpen(true);
+            }}
+          >
             Buy
           </button>
         </div>
       </div>
     </div>
+
+      <ProductPopup 
+        product={product}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
+    </>
   );
 };
 
