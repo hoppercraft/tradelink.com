@@ -15,7 +15,10 @@ const Header = () => {
   return (
     <header className="fixed top-0 left-0 right-0 h-16 bg-white shadow flex items-center justify-between px-6 z-50">
       {/* Logo */}
-      <h1 className="text-2xl font-extrabold tracking-wide text-gray-900">
+      <h1 
+        className="text-2xl font-extrabold tracking-wide text-gray-900 cursor-pointer"
+        onClick={() => navigate("/explore")}
+      >
         TRADE<span className="text-indigo-600">LiNK</span>
       </h1>
 
