@@ -35,7 +35,7 @@ const Login = () => {
     localStorage.setItem(REFRESH_TOKEN, res.data.refresh);
 
     // Redirect
-    navigate("/explore");
+    navigate("/home/explore");
   } catch (err) {
     // FIX: Use setLocalError instead of setError
     const message = err.response?.data?.detail || "Invalid username or password";

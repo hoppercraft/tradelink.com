@@ -15,7 +15,7 @@ const SidePanel = () => {
         <ul className="space-y-2">
           <li>
             <NavLink
-              to="/explore"
+              to="/home/explore"
               className={({ isActive }) =>
                 `${linkClass} ${isActive? "bg-indigo-600 text-white"  : "hover:bg-gray-800"}`}>
               Explore
@@ -24,7 +24,7 @@ const SidePanel = () => {
 
           <li>
             <NavLink
-              to="/profile"
+              to="/home/profile"
               className={({ isActive }) =>
                 `${linkClass} ${ isActive? "bg-indigo-600 text-white": "hover:bg-gray-800"}`}>
               Profile
@@ -33,7 +33,7 @@ const SidePanel = () => {
 
           <li>
             <NavLink
-              to="/post"
+              to="/home/post"
               className={({ isActive }) =>
                 `${linkClass} ${ isActive? "bg-indigo-600 text-white": "hover:bg-gray-800"}`}>
               Post Items
@@ -42,7 +42,7 @@ const SidePanel = () => {
 
            <li>
             <NavLink
-              to="/chat"
+              to="/home/chat"
               className={({ isActive }) =>
                 `${linkClass} ${ isActive? "bg-indigo-600 text-white": "hover:bg-gray-800"}`}>
               Chats
@@ -51,7 +51,7 @@ const SidePanel = () => {
 
           <li>
             <NavLink
-              to="/help"
+              to="/home/help"
               className={({ isActive }) =>
                 `${linkClass} ${isActive? "bg-indigo-600 text-white": "hover:bg-gray-800"}`}>
               Help & Report

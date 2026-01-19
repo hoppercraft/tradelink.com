@@ -17,7 +17,7 @@ const Header = () => {
       {/* Logo */}
       <h1 
         className="text-2xl font-extrabold tracking-wide text-gray-900 cursor-pointer"
-        onClick={() => navigate("/explore")}
+        onClick={() => navigate("/home/explore")}
       >
         TRADE<span className="text-indigo-600">LiNK</span>
       </h1>
@@ -38,7 +38,7 @@ const Header = () => {
       <div className="flex items-center gap-5">
         <IoNotificationsSharp
           className="text-2xl text-gray-600 hover:text-indigo-600 cursor-pointer"
-          onClick={() => navigate("/profile")}
+          onClick={() => navigate("/home/profile")}
         />
         <MdLogout
           className="text-2xl text-gray-600 hover:text-red-500 cursor-pointer"

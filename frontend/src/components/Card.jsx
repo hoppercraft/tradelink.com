@@ -16,16 +16,12 @@ const Card = ({ product }) => {
           alt={product.item_name}
           className="h-full w-full object-cover"
         />
-        {/* Hover Overlay with Description */}
-        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center p-4">
-          <p className="text-white text-sm text-center leading-relaxed">
-            This is a detailed description that appears when you hover over the product image.
-          </p>
-        </div>
+        
       </div>
 
       <div className="p-4 space-y-2">
         <p className="text-sm text-gray-600">
+          <strong>{product.item_name}</strong><br/>
           {product.description}
         </p>
 
