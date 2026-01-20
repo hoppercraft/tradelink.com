@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { ACCESS_TOKEN } from "../constants";
-import { api } from "../apicentralize";
+import { ACCESS_TOKEN,REFRESH_TOKEN } from "../constants";
+import api from "../apicentralize";
 import { AuthContext } from "./useAuth";
 
 export const Authprovider = ({ children }) => {
@@ -19,8 +19,8 @@ export const Authprovider = ({ children }) => {
       }
 
       try {
-        const data = await api("/me"); // GET current user
-        setUser(data);
+        const res = await api.get("/me");
+        setUser(res.data);
         setIsAuthenticated(true);
       } catch {
         localStorage.removeItem(ACCESS_TOKEN);
@@ -31,36 +31,33 @@ export const Authprovider = ({ children }) => {
       }
     };
     init();
-  }, []);
+    }, []);
 
-  const login = async (input) => {
+    const login = async (input) => {
     setError(null);
     try {
-      const loginData = await api("/login", {
-        method: "POST",
-        body: JSON.stringify(input),
-      });
+      const res = await api.post("/token/", input); // Ensure the trailing slash is there
+      const loginData = res.data;
 
-      if (!loginData.token) {
-        setError("Invalid credentials");
-        setUser(null);
-        setIsAuthenticated(false);
+      // CHANGE THIS: Look for .access, not .token
+      if (!loginData.access) {
         throw new Error("Invalid credentials");
       }
 
-      localStorage.setItem(ACCESS_TOKEN, loginData.token);
-
-      const userData = await api("/me");
-      setUser(userData);
+      // CHANGE THIS: Store the access string
+      localStorage.setItem(ACCESS_TOKEN, loginData.access);
+      localStorage.setItem(REFRESH_TOKEN, loginData.refresh);
+      const userRes = await api.get("/me");
+      setUser(userRes.data);
       setIsAuthenticated(true);
     } catch (err) {
-      setError(err.message || "Login failed");
+      // This catches both the 401 from the server AND your manual "Invalid credentials" error
+      setError(err.response?.data?.detail || err.message || "Login failed");
       setUser(null);
       setIsAuthenticated(false);
       throw err;
     }
   };
-
   const logout = () => {
     localStorage.removeItem(ACCESS_TOKEN);
     setUser(null);
@@ -68,20 +65,19 @@ export const Authprovider = ({ children }) => {
   };
 
   const updateUser = async (payload) => {
-  const res = await fetch("/api/profile", {
-    method: "PUT",
-    credentials: "include",
-    body: payload  
-  });
-
-  if (!res.ok) return;
-  const updatedUser = await res.json();
-  setUser(updatedUser);
-};
+    try {
+      const res = await api.put("/api/profile", payload, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      setUser(res.data);
+    } catch {
+      return;
+    }
+  };
 
   return (
     <AuthContext.Provider
-      value={{ user, isAuthenticated, loading, error, login, logout,updateUser }}
+      value={{ user, isAuthenticated, loading, error, login, logout, updateUser }}
     >
       {children}
     </AuthContext.Provider>

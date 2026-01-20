@@ -1,9 +1,9 @@
 // detail_product.jsx
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { DetailContext } from "./getDetail";
-import api from "../api"; // your axios instance
+import api from "../apicentralize"; // centralized axios
+import { AuthContext } from "../auth/useAuth"; // get current user (optional)
 
-// Optional: fallback mock products in dev
 const MOCK_PRODUCTS = [
   {
     id: 1,
@@ -25,28 +25,28 @@ const MOCK_PRODUCTS = [
 
 export const DetailProvider = ({ children }) => {
   const [products, setProducts] = useState([]);
+  const { user, isAuthenticated } = useContext(AuthContext);
 
   useEffect(() => {
+    if (!isAuthenticated) {
+      // Optionally, skip fetching if user is not logged in
+      setProducts(MOCK_PRODUCTS);
+      return;
+    }
+
     const fetchProducts = async () => {
       try {
-        // ✅ Correct API endpoint
-        const res = await api.get("/api/items/");
-
-        // Log the JSON response
+        const res = await api.get("/items/"); // Axios instance with token
         console.log("Products JSON from API:", res.data);
-
-        setProducts(res.data); // Axios parses JSON automatically
+        setProducts(res.data);
       } catch (err) {
         console.error("Error fetching products:", err);
-
-        // fallback to mock products
         setProducts(MOCK_PRODUCTS);
-        console.log("Using MOCK_PRODUCTS:", MOCK_PRODUCTS);
       }
     };
 
     fetchProducts();
-  }, []);
+  }, [isAuthenticated]); // re-fetch when login state changes
 
   return (
     <DetailContext.Provider value={{ products }}>

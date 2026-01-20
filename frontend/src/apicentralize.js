@@ -1,42 +1,59 @@
-import { ACCESS_TOKEN } from "./constants";
+// apicentralize.js
+import axios from "axios";
+import { ACCESS_TOKEN,REFRESH_TOKEN } from "./constants";
 
-export const api=async(url,options={})=>{
-const token=localStorage.getItem(ACCESS_TOKEN);
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL || "", // or your backend URL
+  headers: {
+    "Content-Type": "application/json",
+  },
+  withCredentials: true,
+});
 
-  const config = {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...(options.headers || {}),
-      Authorization: token ? `Bearer ${token}` : "",
-    },
-    credentials: "include",
-  };
-    let response = await fetch(url, config);
+// Attach token before every request
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem(ACCESS_TOKEN);
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
-         if (response.status === 401) {
-    const refreshRes = await fetch("/api/token/refresh/", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include", 
-    });
+// Handle 401 + refresh token
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
 
-    if (!refreshRes.ok) {
-      localStorage.removeItem(ACCESS_TOKEN);
-      throw new Error("Unauthorized");
+    // If unauthorized and not already retried
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+
+      try {
+        const refreshRes = await axios.post(
+          "/api/token/refresh/",
+          {},
+          { withCredentials: true }
+        );
+
+        const newAccess = refreshRes.data.access;
+        localStorage.setItem(ACCESS_TOKEN, newAccess);
+
+        // Update header and retry original request
+        originalRequest.headers.Authorization = `Bearer ${newAccess}`;
+        return api(originalRequest);
+      } catch (refreshError) {
+        localStorage.removeItem(ACCESS_TOKEN);
+        window.location.href = "/login"; // force logout
+        return Promise.reject(refreshError);
+      }
     }
 
-    const refreshData = await refreshRes.json();
-    localStorage.setItem(ACCESS_TOKEN, refreshData.access);
-
-    config.headers.Authorization = `Bearer ${refreshData.access}`;
-    response = await fetch(url, config);
+    return Promise.reject(error);
   }
+);
 
-  if (!response.ok) {
-    const errData = await response.json().catch(() => ({}));
-    throw new Error(errData.error || "Request failed");
-  }
-
-  return response.json();
-}
+export default api;

@@ -1,4 +1,4 @@
-import { createBrowserRouter, createRoutesFromElements, Route } from 'react-router-dom';
+import { createBrowserRouter, createRoutesFromElements, Route,Navigate } from 'react-router-dom';
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import Home from "../pages/Home";
@@ -13,6 +13,7 @@ import Profile from './Profile.jsx';
 const router = createBrowserRouter(
   createRoutesFromElements(
     <>
+      <Route path="/" element={<Navigate to="/home/explore" replace />} />
       {/* Protected /home route */}
       <Route
         path="/home"
@@ -37,7 +38,6 @@ const router = createBrowserRouter(
         <Route path="chat" element={<Chat />} />
         <Route path="profile" element={<Profile />} />
       </Route>
-      <Route path="/" element={<Login />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="*" element={<NotFound />} />
