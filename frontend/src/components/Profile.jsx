@@ -5,7 +5,7 @@ import { useAuth } from '../auth/useAuth'
 import ProfileUpdate from './ProfileUpdate'
 
 const Profile = () => {
-  const { user } = useAuth
+  const { user } = useAuth();
   const [open, setOpen] = useState(false);
   return (
     <div className="min-h-screen bg-gray-100 pb-5">
@@ -25,7 +25,7 @@ const Profile = () => {
         </button>
       </div>
 
-      {open && user && <ProfileUpdate close={() => setOpen(false)} />}
+      {open && <ProfileUpdate close={() => setOpen(false)} />}
 
       <div className="grid grid-cols-1 md:grid-cols-6 gap-6 px-4 mt-8">
         {/* Notifications */}

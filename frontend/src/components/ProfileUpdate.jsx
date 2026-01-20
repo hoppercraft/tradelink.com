@@ -2,12 +2,15 @@ import { useRef, useState } from "react";
 import { useAuth } from "../auth/useAuth.js";
 
 const ProfileUpdate = ({ close }) => {
-  const { user, updateUser } = useAuth();
+  const authContext = useAuth();
+  const user = authContext?.user || null;
+  const updateUser = authContext?.updateUser || null;
   const fileInputRef = useRef(null);
+  const [imagePreview, setImagePreview] = useState(null);
 
   const [form, setForm] = useState({
-    username: user.username,
-    information: user.information,
+    username: user?.username || "Guest User",
+    information: user?.information || "No information yet",
     profilepic: null
   });
 
@@ -17,6 +20,13 @@ const ProfileUpdate = ({ close }) => {
     const file = e.target.files[0];
     if (!file) return;
     setForm({ ...form, profilepic: file });
+    
+    // Create preview URL
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result);
+    };
+    reader.readAsDataURL(file);
   };
 
   const submit = async () => {
@@ -28,7 +38,12 @@ const ProfileUpdate = ({ close }) => {
       formData.append("profilepic", form.profilepic);
     }
 
-    await updateUser(formData);
+    // Call updateUser if available (when backend is ready)
+    if (updateUser) {
+      await updateUser(formData);
+    } else {
+      console.log("Profile update (UI only):", form);
+    }
     close();
   };
 
@@ -53,6 +68,13 @@ const ProfileUpdate = ({ close }) => {
           >
             Choose Image
           </button>
+          {imagePreview && (
+            <img
+              src={imagePreview}
+              alt="Preview"
+              className="w-20 h-20 rounded-full object-cover border-2 border-gray-300"
+            />
+          )}
           <input
             type="file"
             accept="image/*"
