@@ -27,4 +27,9 @@ app.use(cookie({
     credentials: true
 }));
 
+
+//routes
+import userRouter from "./router/user.router.js";
+app.use("/api/v1/tradelink", userRouter);
+
 export default app;

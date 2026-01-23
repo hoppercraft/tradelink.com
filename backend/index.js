@@ -1,6 +1,7 @@
 import app from "./app.js"
 import { connectdb } from "./database/db.database.js"
 import dotenv from "dotenv";
+import router from "./router/user.router.js";
 
 dotenv.config({
     path: "./.env"
