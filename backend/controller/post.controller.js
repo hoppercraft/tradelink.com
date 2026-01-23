@@ -45,8 +45,32 @@ const createPost = asyncHandler(async (req, res) => {
     });
 });
 
-const getPosts = asyncHandler(async (req, res) => {});
+const getPosts = asyncHandler(async (req, res) => {
+    const posts = await Post.find().sort({ createdAt: -1 });
+    res.status(200).json({
+        success: true,
+        data: posts
+    });
+});
 
-const deletePost = asyncHandler(async (req, res) => {});
+const deletePost = asyncHandler(async (req, res) => {
+    const { postId } = req.params;
+
+    const post = await Post.findById(postId);
+
+    if (!post) {
+        return res.status(404).json({
+            success: false,
+            message: "Post not found."
+        });
+    }
+
+    await Post.findByIdAndDelete(postId);
+
+    res.status(200).json({
+        success: true,
+        message: "Post deleted successfully."
+    });
+});
 
 export { createPost, getPosts, deletePost };
