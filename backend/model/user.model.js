@@ -3,6 +3,9 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";  
 
 const userSchema = new mongoose.Schema({
+    fullname: { type: String },
+    email: { type: String, unique: true },
+    location: { type: String },
     username: { type: String, required: true, unique: true },
     password: { type: String, required: true },
 }, { timestamps: true });
@@ -21,18 +24,18 @@ userSchema.methods.accessToken = function () {
     return jwt.sign(
         { userId: this._id,
          username: this.username },
-        process.env.JWT1_SECRET,
-        { expiresIn: process.env.JWT1_EXPIRE }
+        process.env.accessToken_SECRET,
+        { expiresIn: process.env.accessToken_EXPIRE }
     );
 };
 
 userSchema.methods.refreshToken = function () {
     return jwt.sign(
         { userId: this._id, username: this.username },
-        process.env.JWT2_REFRESH_SECRET,
+        process.env.refreshToken_SECRET,
 
         { 
-            expiresIn: process.env.JWT2_REFRESH_EXPIRE
+            expiresIn: process.env.refreshToken_EXPIRE
         }
     );
 };

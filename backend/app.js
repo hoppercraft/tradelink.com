@@ -32,4 +32,7 @@ app.use(cookie({
 import userRouter from "./router/user.router.js";
 app.use("/api/v1/tradelink", userRouter);
 
+import postRouter from "./router/post.router.js";
+app.use("/api/v1/tradelink/post", postRouter);
+
 export default app;

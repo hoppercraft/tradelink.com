@@ -78,7 +78,7 @@ const logoutUser = asyncHandler(async (req, res) => {
 const getProfile = asyncHandler(async (req, res) => {
     const userId = req.user.userId;
 
-    const user = await User.findById(userId).select("-password");
+    const user = await User.findById(userId).select("-password  -_id");
 
     if (!user) {
         return res.status(404).json({ message: "User not found" });
@@ -103,7 +103,44 @@ const changePassword = asyncHandler(async (req, res) => {
     await user.save();
     res.status(200).json({ message: "Password changed successfully" });
 }); 
+const updateProfile = asyncHandler(async (req, res) => {
+    const userId = req.user.userId;
+    const { fullname, email, location } = req.body;
 
+    const user = await User.findById(userId);
 
+    if (!user) {
+        return res.status(404).json({ message: "User not found" });
+    }       
 
-export { registerUser,loginUser , logoutUser, getProfile, changePassword };
+    user.fullname = fullname || user.fullname;
+    user.email = email || user.email;
+    user.location = location || user.location;
+
+    await user.save();
+    res.status(200).json({ message: "Profile updated successfully" });
+});
+
+const deleteUser = asyncHandler(async (req, res) => {
+    const userId = req.user.userId;
+    const {password} = req.body;
+    const user = await User.findById(userId);
+
+    if (!user) {
+        return res.status(404).json({ message: "User not found" });
+    }
+
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+        return res.status(401).json({ message: "Password is incorrect" });
+    }
+
+    await User.findByIdAndDelete(userId);
+
+    res.clearCookie("accessToken");
+    res.clearCookie("refreshToken");
+
+    res.status(200).json({ message: "User deleted successfully" }); 
+});
+
+export { registerUser,loginUser , logoutUser, getProfile, changePassword , updateProfile ,deleteUser};
