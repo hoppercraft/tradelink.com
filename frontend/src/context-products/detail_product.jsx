@@ -6,20 +6,22 @@ import { AuthContext } from "../auth/useAuth"; // get current user (optional)
 
 const MOCK_PRODUCTS = [
   {
-    id: 1,
-    item_name: "Laptop",
-    description: "Good condition",
+    _id: "1",
+    title: "Laptop",
+    content: "Good condition",
     price: 1200,
-    image: "https://via.placeholder.com/300",
-    owner: { username: "john", avatar: "" },
+    photo: ["https://via.placeholder.com/300"],
+    author: "john",
+    locations: ["New York"],
   },
   {
-    id: 2,
-    item_name: "Phone",
-    description: "Almost new",
+    _id: "2",
+    title: "Phone",
+    content: "Almost new",
     price: 800,
-    image: "https://via.placeholder.com/300",
-    owner: { username: "alice", avatar: "" },
+    photo: ["https://via.placeholder.com/300"],
+    author: "alice",
+    locations: ["Los Angeles"],
   },
 ];
 
@@ -36,11 +38,15 @@ export const DetailProvider = ({ children }) => {
 
     const fetchProducts = async () => {
       try {
-        const res = await api.get("/api/items/"); // Axios instance with token
-        console.log("Products JSON from API:", res.data);
-        setProducts(res.data);
+        const res = await api.get("/api/v1/tradelink/post");
+        console.log("Posts from API:", res.data);
+        if (res.data.success && res.data.data) {
+          setProducts(res.data.data);
+        } else {
+          setProducts(MOCK_PRODUCTS);
+        }
       } catch (err) {
-        console.error("Error fetching products:", err);
+        console.error("Error fetching posts:", err);
         setProducts(MOCK_PRODUCTS);
       }
     };
@@ -49,7 +55,7 @@ export const DetailProvider = ({ children }) => {
   }, [isAuthenticated]); // re-fetch when login state changes
 
   return (
-    <DetailContext.Provider value={{ products }}>
+    <DetailContext.Provider value={{ products, setProducts }}>
       {children}
     </DetailContext.Provider>
   );

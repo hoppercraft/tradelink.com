@@ -5,17 +5,20 @@ const OwnerCard = ({ product, onEdit, onRemove }) => {
     <div className="w-full rounded-xl overflow-hidden bg-white shadow-md transition-transform transform hover:scale-[1.02] hover:shadow-lg">
       <div className="h-32 bg-gray-100">
         <img
-          src={product?.image || "https://via.placeholder.com/300"}
+          src={product?.photo?.[0] || "https://via.placeholder.com/300"}
           alt="product"
           className="h-full w-full object-cover"
         />
       </div>
       <div className="p-3 space-y-1">
+        <p className="text-sm font-semibold text-gray-900">
+          {product?.title || "Product Title"}
+        </p>
         <p className="text-xs text-gray-600 line-clamp-2">
-          {product?.description || "Short product description goes here"}
+          {product?.content || "Product description"}
         </p>
         <p className="text-sm font-semibold text-gray-900">
-          Rs. {product?.price || 1200}
+          Rs. {product?.price || "N/A"}
         </p>
         <div className="flex items-center justify-between pt-1">
           <button 

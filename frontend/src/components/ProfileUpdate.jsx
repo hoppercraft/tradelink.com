@@ -1,17 +1,15 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useAuth } from "../auth/useAuth.js";
 
 const ProfileUpdate = ({ close }) => {
   const authContext = useAuth();
   const user = authContext?.user || null;
   const updateUser = authContext?.updateUser || null;
-  const fileInputRef = useRef(null);
-  const [imagePreview, setImagePreview] = useState(null);
 
   const [form, setForm] = useState({
-    username: user?.username || "Guest User",
-    information: user?.information || "No information yet",
-    profilepic: null
+    fullname: user?.fullname || "",
+    email: user?.email || "",
+    location: user?.location || ""
   });
 
   const chooseImage = () => fileInputRef.current.click();
@@ -30,21 +28,20 @@ const ProfileUpdate = ({ close }) => {
   };
 
   const submit = async () => {
-    const formData = new FormData();
-    formData.append("username", form.username);
-    formData.append("information", form.information);
-
-    if (form.profilepic) {
-      formData.append("profilepic", form.profilepic);
+    try {
+      if (updateUser) {
+        await updateUser({
+          fullname: form.fullname,
+          email: form.email,
+          location: form.location
+        });
+        alert("Profile updated successfully!");
+      }
+      close();
+    } catch (err) {
+      console.error("Profile update error:", err);
+      alert("Failed to update profile");
     }
-
-    // Call updateUser if available (when backend is ready)
-    if (updateUser) {
-      await updateUser(formData);
-    } else {
-      console.log("Profile update (UI only):", form);
-    }
-    close();
   };
 
   return (
@@ -84,33 +81,60 @@ const ProfileUpdate = ({ close }) => {
           />
         </div>
 
-        {/* Username */}
+        {/* Username - Read Only */}
         <div className="flex flex-col gap-2">
           <label>Username</label>
           <input
-            value={form.username}
+            value={user?.username || ""}
+            disabled
+            className="border rounded-xl px-4 py-3 bg-gray-100 cursor-not-allowed"
+          />
+          <p className="text-xs text-gray-500">Username cannot be changed</p>
+        </div>
+
+        {/* Full Name */}
+        <div className="flex flex-col gap-2">
+          <label>Full Name</label>
+          <input
+            value={form.fullname}
             onChange={e =>
-              setForm({ ...form, username: e.target.value })
+              setForm({ ...form, fullname: e.target.value })
             }
+            placeholder="Enter your full name"
             className="border rounded-xl px-4 py-3"
           />
         </div>
 
-        {/* Information */}
+        {/* Email */}
         <div className="flex flex-col gap-2">
-          <label>Information</label>
+          <label>Email</label>
           <input
-            value={form.information}
+            type="email"
+            value={form.email}
             onChange={e =>
-              setForm({ ...form, information: e.target.value })
+              setForm({ ...form, email: e.target.value })
             }
+            placeholder="Enter your email"
+            className="border rounded-xl px-4 py-3"
+          />
+        </div>
+
+        {/* Location */}
+        <div className="flex flex-col gap-2">
+          <label>Location</label>
+          <input
+            value={form.location}
+            onChange={e =>
+              setForm({ ...form, location: e.target.value })
+            }
+            placeholder="Enter your location"
             className="border rounded-xl px-4 py-3"
           />
         </div>
 
         <button
           onClick={submit}
-          className="w-full py-3 bg-amber-600 text-white rounded-xl font-semibold"
+          className="w-full py-3 bg-amber-600 text-white rounded-xl font-semibold hover:bg-amber-700 transition cursor-pointer"
         >
           Save Changes
         </button>

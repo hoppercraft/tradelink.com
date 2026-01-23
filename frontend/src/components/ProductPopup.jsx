@@ -7,7 +7,7 @@ const ProductPopup = ({ product, isOpen, onClose }) => {
 
   const handleBuy = () => {
     // Implementing buy functionality
-    alert(`Purchasing ${product.item_name} for Rs. ${product.price}`);
+    alert(`Purchasing ${product.title} for Rs. ${product.price}`);
     onClose();
   };
 
@@ -24,10 +24,10 @@ const ProductPopup = ({ product, isOpen, onClose }) => {
         <div className="flex flex-col md:flex-row min-h-[500px]">
           {/* Left Side - Product Image */}
           <div className="w-full md:w-[45%] h-96 md:h-auto bg-gray-200 overflow-hidden flex items-center justify-center">
-            {!imageError && product.image ? (
+            {!imageError && product.photo?.[0] ? (
               <img
-                src={product.image}
-                alt={product.item_name}
+                src={product.photo[0]}
+                alt={product.title}
                 className="w-full h-full object-cover"
                 onError={() => setImageError(true)}
               />
@@ -41,48 +41,51 @@ const ProductPopup = ({ product, isOpen, onClose }) => {
           {/* Right Side - Product Details */}
           <div className="w-full md:w-[55%] p-8 space-y-4">
             {/* Title */}
-            <h2 className="text-2xl font-semibold text-gray-800">{product.item_name}</h2>
+            <h2 className="text-2xl font-semibold text-gray-800">{product.title}</h2>
 
             {/* Price */}
             <div>
               <span className="text-3xl font-semibold text-indigo-600">
-                Rs. {product.price}
+                Rs. {product.price || "N/A"}
               </span>
             </div>
 
+            {/* Location */}
+            {product.locations?.[0] && (
+              <div className="flex flex-col gap-2">
+                <label className="text-base text-gray-800">Location</label>
+                <p className="text-gray-700 text-sm">
+                  {product.locations[0]}
+                </p>
+              </div>
+            )}
+
             {/* Description */}
-            {product.description && (
+            {product.content && (
               <div className="flex flex-col gap-2">
                 <label className="text-base text-gray-800">Description</label>
                 <p className="text-gray-700 leading-relaxed text-sm">
-                  {product.description}
+                  {product.content}
                 </p>
               </div>
             )}
 
             {/* Seller Information */}
-            {product.owner && (
-              <div className="flex flex-col gap-2 border-t pt-4">
-                <label className="text-base text-gray-800">Seller Information</label>
-                <div className="flex items-center gap-3">
-                  <div className="h-12 w-12 rounded-full overflow-hidden border-2 border-gray-300">
-                    <img
-                      src={product.owner.avatar || "https://via.placeholder.com/64"}
-                      alt={product.owner.username}
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-                  <div>
-                    <p className="text-base font-semibold text-gray-900">
-                      @{product.owner.username}
-                    </p>
-                    <p className="text-xs text-gray-600">
-                      {product.owner.email}
-                    </p>
-                  </div>
+            <div className="flex flex-col gap-2 border-t pt-4">
+              <label className="text-base text-gray-800">Seller Information</label>
+              <div className="flex items-center gap-3">
+                <div className="h-12 w-12 rounded-full overflow-hidden border-2 border-indigo-200 bg-indigo-100 flex items-center justify-center">
+                  <span className="text-lg font-semibold text-indigo-600">
+                    {typeof product.author === 'string' ? product.author.charAt(0).toUpperCase() : 'U'}
+                  </span>
+                </div>
+                <div>
+                  <p className="text-base font-semibold text-gray-900">
+                    Seller ID: {typeof product.author === 'string' ? product.author : 'Unknown'}
+                  </p>
                 </div>
               </div>
-            )}
+            </div>
 
             {/* Action Buttons */}
             <div className="flex gap-3 pt-2">

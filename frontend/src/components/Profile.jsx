@@ -1,10 +1,11 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import OwnerCard from './OwnerCard'
 import NotificationCard from './NotificationCard'
 import { useAuth } from '../auth/useAuth'
 import ProfileUpdate from './ProfileUpdate'
 import ProductUpdate from './ProductUpdate'
 import DeleteConfirmation from './DeleteConfirmation'
+import api from '../apicentralize'
 
 const Profile = () => {
   const { user } = useAuth();
@@ -12,14 +13,27 @@ const Profile = () => {
   const [productEditOpen, setProductEditOpen] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [userPosts, setUserPosts] = useState([]);
 
-  // Mock products for UI testing (will be replaced with real data from backend)
-  const mockProducts = [
-    { id: 1, item_name: "Product 1", description: "product description", price: 1200, image: "https://via.placeholder.com/300" },
-    { id: 2, item_name: "Product 2", description: "product description", price: 2500, image: "https://via.placeholder.com/300" },
-    { id: 3, item_name: "Product 3", description: "prod desc", price: 850, image: "https://via.placeholder.com/300" },
-    { id: 4, item_name: "Product 4", description: "desc product", price: 3200, image: "https://via.placeholder.com/300" },
-  ];
+  // Fetch user's posts
+  useEffect(() => {
+    const fetchUserPosts = async () => {
+      if (!user?._id) return;
+      
+      try {
+        const res = await api.get('/api/v1/tradelink/post');
+        if (res.data.success && res.data.data) {
+          // Filter posts by the current user
+          const myPosts = res.data.data.filter(post => post.author === user._id);
+          setUserPosts(myPosts);
+        }
+      } catch (err) {
+        console.error("Error fetching user posts:", err);
+      }
+    };
+
+    fetchUserPosts();
+  }, [user]);
 
   const handleEditProduct = (product) => {
     setSelectedProduct(product);
@@ -31,10 +45,17 @@ const Profile = () => {
     setDeleteConfirmOpen(true);
   };
 
-  const confirmDelete = () => {
-    //Call backend API to delete product
-    console.log("Delete confirmed for product:", selectedProduct);
-    setSelectedProduct(null);
+  const confirmDelete = async () => {
+    try {
+      await api.delete(`/api/v1/tradelink/post/${selectedProduct._id}`);
+      // Remove the deleted post from state
+      setUserPosts(userPosts.filter(post => post._id !== selectedProduct._id));
+      setDeleteConfirmOpen(false);
+      setSelectedProduct(null);
+    } catch (err) {
+      console.error("Delete error:", err);
+      alert("Failed to delete product");
+    }
   };
 
   return (
@@ -47,8 +68,9 @@ const Profile = () => {
             alt="profile"
             className="rounded-full border-4 border-white h-36 w-36 object-cover shadow-lg mt-3"
           />
-          <p className="mt-3 text-4xl font-bold text-gray-900">Username</p>
-          <p className="text-lg text-gray-600 mt-1">Information</p>
+          <p className="mt-3 text-4xl font-bold text-gray-900">{user?.username || "Username"}</p>
+          <p className="text-lg text-gray-600 mt-1">{user?.email || "Email not set"}</p>
+          {user?.location && <p className="text-sm text-gray-500">{user.location}</p>}
         </div>
         <button className="mt-4 md:mt-10 px-8 py-3 bg-indigo-600 text-white font-semibold rounded-2xl shadow-lg hover:shadow-xl hover:scale-105 transition-transform duration-300 cursor-pointer" onClick={() => { setOpen(true) }}>
           Change Profile
@@ -66,7 +88,7 @@ const Profile = () => {
         <DeleteConfirmation
           close={() => setDeleteConfirmOpen(false)}
           onConfirm={confirmDelete}
-          productName={selectedProduct?.item_name}
+          productName={selectedProduct?.title}
         />
       )}
 
@@ -85,14 +107,18 @@ const Profile = () => {
         <div className="md:col-span-4 space-y-3 bg-white p-4 rounded-lg shadow-md">
           <p className="text-xl font-semibold text-gray-800 mb-2">My Shop</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {mockProducts.map((product) => (
-              <OwnerCard 
-                key={product.id}
-                product={product}
-                onEdit={handleEditProduct}
-                onRemove={handleRemoveProduct}
-              />
-            ))}
+            {userPosts.length > 0 ? (
+              userPosts.map((product) => (
+                <OwnerCard 
+                  key={product._id}
+                  product={product}
+                  onEdit={handleEditProduct}
+                  onRemove={handleRemoveProduct}
+                />
+              ))
+            ) : (
+              <p className="text-gray-500 col-span-3 text-center py-8">No products posted yet</p>
+            )}
           </div>
         </div>
       </div>

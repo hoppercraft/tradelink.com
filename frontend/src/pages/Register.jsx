@@ -30,11 +30,9 @@ const Register = () => {
     setLoading(true);
 
     try {
-      const res = await api.post("/api/user/register/", {
+      const res = await api.post("/api/v1/tradelink/register", {
         username: form.name,
         password: form.password,
-        email: form.email,
-        first_name: form.name,
       });
 
       if (res.status === 201) {
@@ -42,8 +40,7 @@ const Register = () => {
       }
     } catch (err) {
       const backendError =
-        err.response?.data?.username?.[0] ||
-        err.response?.data?.email?.[0] ||
+        err.response?.data?.message ||
         err.response?.data?.detail ||
         "Registration failed";
       setError(backendError);

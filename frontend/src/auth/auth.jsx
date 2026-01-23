@@ -19,8 +19,8 @@ export const Authprovider = ({ children }) => {
       }
 
       try {
-        const res = await api.get("/api/me");
-        setUser(res.data);
+        const res = await api.get("/api/v1/tradelink/profile");
+        setUser(res.data.user);
         setIsAuthenticated(true);
       } catch {
         localStorage.removeItem(ACCESS_TOKEN);
@@ -36,29 +36,33 @@ export const Authprovider = ({ children }) => {
     const login = async (input) => {
     setError(null);
     try {
-      const res = await api.post("/api/token/", input); // Ensure the trailing slash is there
+      const res = await api.post("/api/v1/tradelink/login", input);
       const loginData = res.data;
 
-      // CHANGE THIS: Look for .access, not .token
-      if (!loginData.access) {
+      if (!loginData.sucess) {
         throw new Error("Invalid credentials");
       }
 
-      // CHANGE THIS: Store the access string
-      localStorage.setItem(ACCESS_TOKEN, loginData.access);
-      localStorage.setItem(REFRESH_TOKEN, loginData.refresh);
-      const userRes = await api.get("/api/me");
-      setUser(userRes.data);
+      // Tokens are set in cookies by backend, but store a flag
+      localStorage.setItem(ACCESS_TOKEN, "logged_in");
+      
+      // Get user profile
+      const userRes = await api.get("/api/v1/tradelink/profile");
+      setUser(userRes.data.user);
       setIsAuthenticated(true);
     } catch (err) {
-      // This catches both the 401 from the server AND your manual "Invalid credentials" error
-      setError(err.response?.data?.detail || err.message || "Login failed");
+      setError(err.response?.data?.message || err.message || "Login failed");
       setUser(null);
       setIsAuthenticated(false);
       throw err;
     }
   };
-  const logout = () => {
+  const logout = async () => {
+    try {
+      await api.post("/api/v1/tradelink/logout");
+    } catch (err) {
+      console.error("Logout error:", err);
+    }
     localStorage.removeItem(ACCESS_TOKEN);
     setUser(null);
     setIsAuthenticated(false);
@@ -66,12 +70,15 @@ export const Authprovider = ({ children }) => {
 
   const updateUser = async (payload) => {
     try {
-      const res = await api.put("/api/profile", payload, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      setUser(res.data);
-    } catch {
-      return;
+      const res = await api.put("/api/v1/tradelink/update-profile", payload);
+      if (res.data.message) {
+        // Fetch updated profile
+        const userRes = await api.get("/api/v1/tradelink/profile");
+        setUser(userRes.data.user);
+      }
+    } catch (err) {
+      console.error("Update profile error:", err);
+      throw err;
     }
   };
 

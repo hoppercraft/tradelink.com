@@ -3,7 +3,7 @@ import api from "../apicentralize";
 import { useAuth } from "../auth/useAuth";
 
 const Post = () => {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, user } = useAuth();
 
   const textareaRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -12,6 +12,7 @@ const Post = () => {
   const [image, setImage] = useState(null);
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
+  const [location, setLocation] = useState("");
   const [preview, setPreview] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -40,21 +41,27 @@ const Post = () => {
       return;
     }
 
-    if (!item_name || !price || !image) {
+    if (!item_name || !price || !image || !location) {
       alert("Please fill in all fields and select an image.");
       return;
     }
 
+    if (!user?._id) {
+      alert("User information not available. Please login again.");
+      return;
+    }
+
     const form_data = new FormData();
-    form_data.append("item_name", item_name);
-    form_data.append("image", image);
-    form_data.append("price", price);
-    form_data.append("description", description);
+    form_data.append("title", item_name);
+    form_data.append("content", description);
+    form_data.append("author", user._id);
+    form_data.append("locations", location);
+    form_data.append("file", image);
 
     try {
       setSubmitting(true);
 
-      const res = await api.post("/api/items/", form_data, {
+      const res = await api.post("/api/v1/tradelink/post", form_data, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -66,13 +73,14 @@ const Post = () => {
         setImage(null);
         setDescription("");
         setPrice("");
+        setLocation("");
         setPreview(null);
       }
     } catch (err) {
       console.error("Upload error:", err);
       alert(
-        err.response?.data?.detail ||
-          "Failed to upload item. Are you logged in?"
+        err.response?.data?.message ||
+          "Failed to upload item. Please try again."
       );
     } finally {
       setSubmitting(false);
@@ -153,6 +161,18 @@ const Post = () => {
             placeholder="e.g. 1200"
             value={price}
             onChange={(e) => setPrice(e.target.value)}
+            className="border border-gray-300 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        {/* Location */}
+        <div className="flex flex-col gap-2">
+          <label className="text-base text-gray-800">Location</label>
+          <input
+            type="text"
+            placeholder="e.g. New York"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
             className="border border-gray-300 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
