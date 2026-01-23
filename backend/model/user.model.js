@@ -32,7 +32,7 @@ userSchema.methods.accessToken = function () {
 userSchema.methods.refreshToken = function () {
     return jwt.sign(
         { userId: this._id, username: this.username },
-        process.env.refreshToken_SECRET,
+         process.env.refreshToken_SECRET,
 
         { 
             expiresIn: process.env.refreshToken_EXPIRE
