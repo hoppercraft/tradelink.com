@@ -69,6 +69,41 @@ const loginUser = asyncHandler(async (req, res) => {
     })
 }); 
 
+const logoutUser = asyncHandler(async (req, res) => {
+    res.clearCookie("accessToken");
+    res.clearCookie("refreshToken");
+    res.status(200).json({ message: "Logout successful" });
+}); 
+
+const getProfile = asyncHandler(async (req, res) => {
+    const userId = req.user.userId;
+
+    const user = await User.findById(userId).select("-password");
+
+    if (!user) {
+        return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({ user });
+});
+
+const changePassword = asyncHandler(async (req, res) => {
+    const userId = req.user.userId;
+    const user = await User.findById(userId);
+
+    if (!user) {
+        return res.status(404).json({ message: "User not found" });
+    }
+    const { oldPassword, newPassword } = req.body;
+    const isMatch = await user.comparePassword(oldPassword);
+    if (!isMatch) {
+        return res.status(401).json({ message: "Old password is incorrect" });
+    }
+    user.password = newPassword;
+    await user.save();
+    res.status(200).json({ message: "Password changed successfully" });
+}); 
 
 
-export { registerUser,loginUser};
+
+export { registerUser,loginUser , logoutUser, getProfile, changePassword };
