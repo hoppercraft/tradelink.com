@@ -1,143 +1,139 @@
 import { useState } from "react";
-import { useAuth } from "../auth/useAuth.js";
+import { IoClose } from "react-icons/io5";
+import api from "../api";
 
-const ProfileUpdate = ({ close }) => {
-  const authContext = useAuth();
-  const user = authContext?.user || null;
-  const updateUser = authContext?.updateUser || null;
-
+const ProfileUpdate = ({ user, onClose, onUpdate }) => {
   const [form, setForm] = useState({
     fullname: user?.fullname || "",
     email: user?.email || "",
-    location: user?.location || ""
+    location: user?.location || "",
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const chooseImage = () => fileInputRef.current.click();
-
-  const changeImage = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    setForm({ ...form, profilepic: file });
-    
-    // Create preview URL
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setImagePreview(reader.result);
-    };
-    reader.readAsDataURL(file);
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const submit = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
     try {
-      if (updateUser) {
-        await updateUser({
-          fullname: form.fullname,
-          email: form.email,
-          location: form.location
-        });
-        alert("Profile updated successfully!");
-      }
-      close();
+      await api.put("/api/v1/tradelink/update-profile", {
+        fullname: form.fullname,
+        email: form.email,
+        location: form.location,
+      });
+      onUpdate();
     } catch (err) {
-      console.error("Profile update error:", err);
-      alert("Failed to update profile");
+      setError(err.response?.data?.message || "Failed to update profile");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div
-      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
-      onClick={close}
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+      onClick={onClose}
     >
       <div
-        className="bg-white w-full max-w-xl rounded-2xl shadow-xl p-8 space-y-6"
-        onClick={e => e.stopPropagation()}
+        className="bg-white rounded-2xl w-full max-w-md shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-2xl font-semibold text-gray-800">
-          Edit Profile
-        </h2>
-
-        {/* Image upload */}
-        <div className="flex items-center gap-6">
+        {/* Header */}
+        <div className="flex items-center justify-between p-5 border-b border-gray-100">
+          <h2 className="text-xl font-bold text-gray-800">Edit Profile</h2>
           <button
-            onClick={chooseImage}
-            className="px-6 py-3 bg-gray-800 text-white rounded-xl"
+            onClick={onClose}
+            className="p-2 hover:bg-gray-100 rounded-lg transition cursor-pointer"
           >
-            Choose Image
+            <IoClose className="text-xl text-gray-500" />
           </button>
-          {imagePreview && (
-            <img
-              src={imagePreview}
-              alt="Preview"
-              className="w-20 h-20 rounded-full object-cover border-2 border-gray-300"
-            />
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="p-5 space-y-4">
+          {error && (
+            <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-red-600 text-sm">{error}</p>
+            </div>
           )}
-          <input
-            type="file"
-            accept="image/*"
-            hidden
-            ref={fileInputRef}
-            onChange={changeImage}
-          />
-        </div>
 
-        {/* Username - Read Only */}
-        <div className="flex flex-col gap-2">
-          <label>Username</label>
-          <input
-            value={user?.username || ""}
-            disabled
-            className="border rounded-xl px-4 py-3 bg-gray-100 cursor-not-allowed"
-          />
-          <p className="text-xs text-gray-500">Username cannot be changed</p>
-        </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Username
+            </label>
+            <input
+              type="text"
+              value={user?.username || ""}
+              disabled
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-500 cursor-not-allowed"
+            />
+            <p className="text-xs text-gray-400 mt-1">Username cannot be changed</p>
+          </div>
 
-        {/* Full Name */}
-        <div className="flex flex-col gap-2">
-          <label>Full Name</label>
-          <input
-            value={form.fullname}
-            onChange={e =>
-              setForm({ ...form, fullname: e.target.value })
-            }
-            placeholder="Enter your full name"
-            className="border rounded-xl px-4 py-3"
-          />
-        </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Full Name
+            </label>
+            <input
+              type="text"
+              name="fullname"
+              value={form.fullname}
+              onChange={handleChange}
+              placeholder="Enter your full name"
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+            />
+          </div>
 
-        {/* Email */}
-        <div className="flex flex-col gap-2">
-          <label>Email</label>
-          <input
-            type="email"
-            value={form.email}
-            onChange={e =>
-              setForm({ ...form, email: e.target.value })
-            }
-            placeholder="Enter your email"
-            className="border rounded-xl px-4 py-3"
-          />
-        </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Email
+            </label>
+            <input
+              type="email"
+              name="email"
+              value={form.email}
+              onChange={handleChange}
+              placeholder="your@email.com"
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+            />
+          </div>
 
-        {/* Location */}
-        <div className="flex flex-col gap-2">
-          <label>Location</label>
-          <input
-            value={form.location}
-            onChange={e =>
-              setForm({ ...form, location: e.target.value })
-            }
-            placeholder="Enter your location"
-            className="border rounded-xl px-4 py-3"
-          />
-        </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Location
+            </label>
+            <input
+              type="text"
+              name="location"
+              value={form.location}
+              onChange={handleChange}
+              placeholder="Enter your location"
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+            />
+          </div>
 
-        <button
-          onClick={submit}
-          className="w-full py-3 bg-amber-600 text-white rounded-xl font-semibold hover:bg-amber-700 transition cursor-pointer"
-        >
-          Save Changes
-        </button>
+          <div className="flex gap-3 pt-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 py-3 border border-gray-200 hover:bg-gray-50 rounded-xl font-medium transition cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex-1 py-3 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white rounded-xl font-medium transition cursor-pointer disabled:cursor-not-allowed"
+            >
+              {loading ? "Saving..." : "Save Changes"}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

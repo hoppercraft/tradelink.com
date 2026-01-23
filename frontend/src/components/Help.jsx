@@ -1,62 +1,97 @@
-import React, { useRef } from "react";
+import { MdHelp, MdEmail, MdPhone, MdQuestionAnswer } from "react-icons/md";
+
+const faqs = [
+  {
+    question: "How do I create a listing?",
+    answer:
+      "Go to the 'Post Item' section from the sidebar, fill in your product details, upload an image, and click Post.",
+  },
+  {
+    question: "How do I contact a seller?",
+    answer:
+      "Click on any product to view details, then use the 'Contact Seller' button to reach out.",
+  },
+  {
+    question: "Is TradeLink free to use?",
+    answer:
+      "Yes! TradeLink is completely free for both buyers and sellers.",
+  },
+  {
+    question: "How do I edit my profile?",
+    answer:
+      "Go to your Profile page and click the 'Edit Profile' button to update your information.",
+  },
+  {
+    question: "How do I delete a listing?",
+    answer:
+      "Go to your Profile page, find the listing in 'My Posts', and click the delete icon.",
+  },
+];
 
 const Help = () => {
-  const textareaRef = useRef(null);
-
-  const autoResize = () => {
-    const size = textareaRef.current;
-    size.style.height = "auto";
-    size.style.height = size.scrollHeight + "px";
-  };
-
   return (
-    <div className="min-h-screen bg-gray-100 px-6 py-10 text-gray-900">
-      <div className="mx-auto max-w-3xl space-y-8">
+    <div className="max-w-3xl mx-auto">
+      {/* Header */}
+      <div className="text-center mb-8">
+        <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <MdHelp className="text-3xl text-indigo-600" />
+        </div>
+        <h1 className="text-2xl font-bold text-gray-800">Help Center</h1>
+        <p className="text-gray-500 mt-2">
+          Find answers to common questions
+        </p>
+      </div>
 
-        {/* Info */}
-        <section className="rounded-xl bg-white border border-gray-200 p-6">
-          <h1 className="text-xl font-semibold mb-2">
-            Help & How It Works
-          </h1>
-          <p className="text-gray-600 leading-relaxed">
-            Browse items from students, open listings to view details,
-            and contact sellers directly. Manage your own listings from
-            your profile. Transactions are handled between users not by our website we only link them.
-          </p>
-        </section>
+      {/* FAQs */}
+      <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
+        <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+          <MdQuestionAnswer className="text-indigo-600" />
+          Frequently Asked Questions
+        </h2>
 
-        {/* Rules */}
-        <section className="rounded-xl bg-white border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold mb-2">
-            Marketplace guidelines
-          </h2>
-          <ul className="list-disc list-inside text-gray-600 space-y-1">
-            <li>Accurate listings only</li>
-            <li>Clear pricing</li>
-            <li>Respectful communication</li>
-            <li>No prohibited items</li>
-          </ul>
-        </section>
+        <div className="space-y-4">
+          {faqs.map((faq, index) => (
+            <div
+              key={index}
+              className="border-b border-gray-100 pb-4 last:border-0 last:pb-0"
+            >
+              <h3 className="font-medium text-gray-800">{faq.question}</h3>
+              <p className="text-gray-500 text-sm mt-1">{faq.answer}</p>
+            </div>
+          ))}
+        </div>
+      </div>
 
-        {/* Report */}
-        <section className="rounded-xl bg-white border border-gray-200 p-6 space-y-4">
-          <h2 className="text-lg font-semibold">
-            Report a problem
-          </h2>
+      {/* Contact */}
+      <div className="bg-white rounded-2xl shadow-sm p-6">
+        <h2 className="text-lg font-semibold text-gray-800 mb-4">
+          Still Need Help?
+        </h2>
 
-          <textarea
-            ref={textareaRef}
-            rows={3}
-            onInput={autoResize}
-            placeholder="Describe the issue..."
-            className="w-full resize-none overflow-hidden rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-400"
-          />
+        <div className="grid sm:grid-cols-2 gap-4">
+          <a
+            href="mailto:kcprabin2063@gmail.com"
+            className="flex items-center gap-3 p-4 border border-gray-100 rounded-xl hover:bg-gray-50 transition"
+          >
+            <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
+              <MdEmail className="text-xl text-indigo-600" />
+            </div>
+            <div>
+              <p className="font-medium text-gray-800">Email Support</p>
+              <p className="text-sm text-gray-500">kcprabin2063@gmail.com</p>
+            </div>
+          </a>
 
-          <button className="rounded-lg bg-red-800 px-5 py-2 text-sm font-medium text-white hover:bg-red-600 cursor-pointer">
-            Report
-          </button>
-        </section>
-
+          <div className="flex items-center gap-3 p-4 border border-gray-100 rounded-xl">
+            <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+              <MdPhone className="text-xl text-green-600" />
+            </div>
+            <div>
+              <p className="font-medium text-gray-800">Phone Support</p>
+              <p className="text-sm text-gray-500">Coming Soon</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

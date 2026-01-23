@@ -3,10 +3,10 @@ import { User } from "../model/user.model.js";
 
 
 const registerUser = asyncHandler(async (req, res) => {
-    const { username, password } = req.body;
+    const { username, password ,email } = req.body;
 
-    if (!username?.trim() || !password?.trim()) {
-        return res.status(400).json({ message: "Username and password are required" });
+    if (!username?.trim() || !password?.trim() || !email?.trim()) {
+        return res.status(400).json({ message: "Username, password, and email are required" });
     }
 
     const existingUser = await User.findOne({ username });
@@ -15,7 +15,7 @@ const registerUser = asyncHandler(async (req, res) => {
         return res.status(409).json({ message: "Username already taken" });
     }
 
-    const newUser = new User({ username, password });
+    const newUser = new User({ username, password ,email });
 
     await newUser.save();
     res.status(201).json({ message: "User registered successfully" }); 

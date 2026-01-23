@@ -1,107 +1,71 @@
-import React, { useState } from "react";
+import { IoClose, IoLocationSharp } from "react-icons/io5";
+import { MdEmail } from "react-icons/md";
 
-const ProductPopup = ({ product, isOpen, onClose }) => {
-  const [imageError, setImageError] = useState(false);
-  
-  if (!isOpen) return null;
-
-  const handleBuy = () => {
-    // Implementing buy functionality
-    alert(`Purchasing ${product.title} for Rs. ${product.price}`);
-    onClose();
-  };
+const ProductPopup = ({ product, onClose }) => {
+  const imageUrl =
+    product.photo && product.photo.length > 0
+      ? product.photo[0]
+      : "https://via.placeholder.com/400x300?text=No+Image";
 
   return (
-    <div 
-      className="fixed inset-0 bg-black/50 flex items-center justify-center pl-[90px] z-50 p-4"
+    <div
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
       onClick={onClose}
     >
-      <div 
-        className="bg-white rounded-xl max-w-5xl w-full shadow-xl overflow-hidden"
+      <div
+        className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Two Column Layout */}
-        <div className="flex flex-col md:flex-row min-h-[500px]">
-          {/* Left Side - Product Image */}
-          <div className="w-full md:w-[45%] h-96 md:h-auto bg-gray-200 overflow-hidden flex items-center justify-center">
-            {!imageError && product.photo?.[0] ? (
-              <img
-                src={product.photo[0]}
-                alt={product.title}
-                className="w-full h-full object-cover"
-                onError={() => setImageError(true)}
-              />
-            ) : (
-              <div className="flex items-center justify-center text-gray-400">
-                <p className="text-lg">No image available</p>
-              </div>
-            )}
+        {/* Header */}
+        <div className="relative">
+          <img
+            src={imageUrl}
+            alt={product.title}
+            className="w-full h-64 object-cover"
+          />
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 p-2 bg-white/90 hover:bg-white rounded-full shadow-lg transition cursor-pointer"
+          >
+            <IoClose className="text-xl text-gray-700" />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="p-6">
+          <h2 className="text-2xl font-bold text-gray-800">{product.title}</h2>
+
+          <div className="flex items-center gap-2 mt-2 text-gray-500">
+            <IoLocationSharp className="text-indigo-500" />
+            <span>{product.locations || "Location not specified"}</span>
           </div>
 
-          {/* Right Side - Product Details */}
-          <div className="w-full md:w-[55%] p-8 space-y-4">
-            {/* Title */}
-            <h2 className="text-2xl font-semibold text-gray-800">{product.title}</h2>
+          <div className="mt-4">
+            <h3 className="font-semibold text-gray-700 mb-2">Description</h3>
+            <p className="text-gray-600 leading-relaxed">
+              {product.content || "No description provided."}
+            </p>
+          </div>
 
-            {/* Price */}
-            <div>
-              <span className="text-3xl font-semibold text-indigo-600">
-                Rs. {product.price || "N/A"}
-              </span>
-            </div>
+          <div className="mt-6 pt-4 border-t border-gray-100">
+            <p className="text-sm text-gray-500">
+              Posted on{" "}
+              {new Date(product.createdAt).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
+            </p>
+          </div>
 
-            {/* Location */}
-            {product.locations?.[0] && (
-              <div className="flex flex-col gap-2">
-                <label className="text-base text-gray-800">Location</label>
-                <p className="text-gray-700 text-sm">
-                  {product.locations[0]}
-                </p>
-              </div>
-            )}
-
-            {/* Description */}
-            {product.content && (
-              <div className="flex flex-col gap-2">
-                <label className="text-base text-gray-800">Description</label>
-                <p className="text-gray-700 leading-relaxed text-sm">
-                  {product.content}
-                </p>
-              </div>
-            )}
-
-            {/* Seller Information */}
-            <div className="flex flex-col gap-2 border-t pt-4">
-              <label className="text-base text-gray-800">Seller Information</label>
-              <div className="flex items-center gap-3">
-                <div className="h-12 w-12 rounded-full overflow-hidden border-2 border-indigo-200 bg-indigo-100 flex items-center justify-center">
-                  <span className="text-lg font-semibold text-indigo-600">
-                    {typeof product.author === 'string' ? product.author.charAt(0).toUpperCase() : 'U'}
-                  </span>
-                </div>
-                <div>
-                  <p className="text-base font-semibold text-gray-900">
-                    Seller ID: {typeof product.author === 'string' ? product.author : 'Unknown'}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex gap-3 pt-2">
-              <button
-                onClick={handleBuy}
-                className="flex-1 py-3 px-6 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition cursor-pointer"
-              >
-                Buy Now
-              </button>
-              <button
-                onClick={onClose}
-                className="px-6 py-3 bg-gray-800 text-white font-semibold rounded-xl hover:bg-gray-700 transition cursor-pointer"
-              >
-                Cancel
-              </button>
-            </div>
+          {/* Actions */}
+          <div className="mt-6 flex gap-3">
+            <button className="flex-1 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold transition cursor-pointer">
+              Contact Seller
+            </button>
+            <button className="p-3 border border-gray-200 hover:bg-gray-50 rounded-xl transition cursor-pointer">
+              <MdEmail className="text-xl text-gray-600" />
+            </button>
           </div>
         </div>
       </div>

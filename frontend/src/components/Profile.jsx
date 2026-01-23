@@ -1,129 +1,194 @@
-import React, { useState, useEffect } from 'react'
-import OwnerCard from './OwnerCard'
-import NotificationCard from './NotificationCard'
-import { useAuth } from '../auth/useAuth'
-import ProfileUpdate from './ProfileUpdate'
-import ProductUpdate from './ProductUpdate'
-import DeleteConfirmation from './DeleteConfirmation'
-import api from '../apicentralize'
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { MdEdit, MdDelete, MdLocationOn, MdEmail } from "react-icons/md";
+import { FiUser } from "react-icons/fi";
+import api from "../api";
+import ProfileUpdate from "./ProfileUpdate";
+import DeleteConfirmation from "./DeleteConfirmation";
 
 const Profile = () => {
-  const { user } = useAuth();
-  const [open, setOpen] = useState(false);
-  const [productEditOpen, setProductEditOpen] = useState(false);
-  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState(null);
+  const navigate = useNavigate();
+  const [user, setUser] = useState(null);
   const [userPosts, setUserPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showEditProfile, setShowEditProfile] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [selectedPost, setSelectedPost] = useState(null);
 
-  // Fetch user's posts
   useEffect(() => {
-    const fetchUserPosts = async () => {
-      if (!user?._id) return;
-      
-      try {
-        const res = await api.get('/api/v1/tradelink/post');
-        if (res.data.success && res.data.data) {
-          // Filter posts by the current user
-          const myPosts = res.data.data.filter(post => post.author === user._id);
-          setUserPosts(myPosts);
-        }
-      } catch (err) {
-        console.error("Error fetching user posts:", err);
-      }
-    };
+    fetchData();
+  }, []);
 
-    fetchUserPosts();
-  }, [user]);
-
-  const handleEditProduct = (product) => {
-    setSelectedProduct(product);
-    setProductEditOpen(true);
-  };
-
-  const handleRemoveProduct = (product) => {
-    setSelectedProduct(product);
-    setDeleteConfirmOpen(true);
-  };
-
-  const confirmDelete = async () => {
+  const fetchData = async () => {
     try {
-      await api.delete(`/api/v1/tradelink/post/${selectedProduct._id}`);
-      // Remove the deleted post from state
-      setUserPosts(userPosts.filter(post => post._id !== selectedProduct._id));
-      setDeleteConfirmOpen(false);
-      setSelectedProduct(null);
+      // Fetch profile
+      const profileRes = await api.get("/api/v1/tradelink/profile");
+      setUser(profileRes.data.user);
+
+      // Fetch all posts and filter user's posts
+      const postsRes = await api.get("/api/v1/tradelink/post");
+      if (postsRes.data.success) {
+        // Filter posts by current user's username
+        const myPosts = postsRes.data.data.filter(
+          (post) => post.author === profileRes.data.user?.username ||
+                    post.author === profileRes.data.user?._id
+        );
+        setUserPosts(myPosts);
+      }
     } catch (err) {
-      console.error("Delete error:", err);
-      alert("Failed to delete product");
+      if (err.response?.status === 401) {
+        navigate("/login");
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
+  const handleDeletePost = async () => {
+    if (!selectedPost) return;
+
+    try {
+      await api.delete(`/api/v1/tradelink/post/${selectedPost._id}`);
+      setUserPosts(userPosts.filter((p) => p._id !== selectedPost._id));
+      setShowDeleteConfirm(false);
+      setSelectedPost(null);
+    } catch (err) {
+      alert("Failed to delete post");
+    }
+  };
+
+  const handleProfileUpdate = () => {
+    setShowEditProfile(false);
+    fetchData(); // Refresh profile data
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-[60vh]">
+        <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gray-100 pb-5">
-      {/* Profile Info */}
-      <div className='flex flex-row items-center justify-center '>
-        <div className="flex flex-col items-center mt-2 px-4">
-          <img
-            src="https://via.placeholder.com/150"
-            alt="profile"
-            className="rounded-full border-4 border-white h-36 w-36 object-cover shadow-lg mt-3"
-          />
-          <p className="mt-3 text-4xl font-bold text-gray-900">{user?.username || "Username"}</p>
-          <p className="text-lg text-gray-600 mt-1">{user?.email || "Email not set"}</p>
-          {user?.location && <p className="text-sm text-gray-500">{user.location}</p>}
+    <div className="max-w-4xl mx-auto">
+      {/* Profile Card */}
+      <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
+        <div className="flex items-start justify-between">
+          <div className="flex items-center gap-5">
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+              <FiUser className="text-3xl text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-800">
+                {user?.fullname || user?.username || "User"}
+              </h1>
+              <p className="text-gray-500">@{user?.username}</p>
+
+              <div className="flex flex-wrap items-center gap-4 mt-3 text-sm text-gray-500">
+                {user?.email && (
+                  <div className="flex items-center gap-1">
+                    <MdEmail className="text-indigo-500" />
+                    <span>{user.email}</span>
+                  </div>
+                )}
+                {user?.location && (
+                  <div className="flex items-center gap-1">
+                    <MdLocationOn className="text-indigo-500" />
+                    <span>{user.location}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <button
+            onClick={() => setShowEditProfile(true)}
+            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition flex items-center gap-2 cursor-pointer"
+          >
+            <MdEdit />
+            Edit Profile
+          </button>
         </div>
-        <button className="mt-4 md:mt-10 px-8 py-3 bg-indigo-600 text-white font-semibold rounded-2xl shadow-lg hover:shadow-xl hover:scale-105 transition-transform duration-300 cursor-pointer" onClick={() => { setOpen(true) }}>
-          Change Profile
-        </button>
       </div>
 
-      {open && <ProfileUpdate close={() => setOpen(false)} />}
-      {productEditOpen && (
-        <ProductUpdate 
-          close={() => setProductEditOpen(false)} 
-          product={selectedProduct}
-        />
-      )}
-      {deleteConfirmOpen && (
-        <DeleteConfirmation
-          close={() => setDeleteConfirmOpen(false)}
-          onConfirm={confirmDelete}
-          productName={selectedProduct?.title}
-        />
-      )}
+      {/* User's Posts */}
+      <div className="bg-white rounded-2xl shadow-sm p-6">
+        <h2 className="text-xl font-bold text-gray-800 mb-4">
+          My Posts ({userPosts.length})
+        </h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-6 gap-6 px-4 mt-8">
-        {/* Notifications */}
-        <div className="md:col-span-2 space-y-3 bg-white p-4 rounded-lg shadow-md">
-          <p className="text-xl font-semibold text-gray-800 mb-2">Notifications</p>
-          <div className="space-y-2">
-            <NotificationCard />
-            <NotificationCard />
-            <NotificationCard />
+        {userPosts.length === 0 ? (
+          <div className="text-center py-12">
+            <div className="text-5xl mb-4">📦</div>
+            <p className="text-gray-500">You haven't posted anything yet</p>
+            <button
+              onClick={() => navigate("/home/post")}
+              className="mt-4 px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition cursor-pointer"
+            >
+              Create First Post
+            </button>
           </div>
-        </div>
-
-        {/* Shop */}
-        <div className="md:col-span-4 space-y-3 bg-white p-4 rounded-lg shadow-md">
-          <p className="text-xl font-semibold text-gray-800 mb-2">My Shop</p>
+        ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {userPosts.length > 0 ? (
-              userPosts.map((product) => (
-                <OwnerCard 
-                  key={product._id}
-                  product={product}
-                  onEdit={handleEditProduct}
-                  onRemove={handleRemoveProduct}
+            {userPosts.map((post) => (
+              <div
+                key={post._id}
+                className="border border-gray-100 rounded-xl overflow-hidden hover:shadow-md transition"
+              >
+                <img
+                  src={post.photo?.[0] || "https://via.placeholder.com/200"}
+                  alt={post.title}
+                  className="w-full h-32 object-cover"
                 />
-              ))
-            ) : (
-              <p className="text-gray-500 col-span-3 text-center py-8">No products posted yet</p>
-            )}
+                <div className="p-3">
+                  <h3 className="font-semibold text-gray-800 truncate">
+                    {post.title}
+                  </h3>
+                  <p className="text-sm text-gray-500 truncate mt-1">
+                    {post.content}
+                  </p>
+                  <div className="flex justify-end gap-2 mt-3">
+                    <button
+                      onClick={() => {
+                        setSelectedPost(post);
+                        setShowDeleteConfirm(true);
+                      }}
+                      className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition cursor-pointer"
+                    >
+                      <MdDelete className="text-lg" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
-        </div>
+        )}
       </div>
-    </div>
-  )
-}
 
-export default Profile
+      {/* Edit Profile Modal */}
+      {showEditProfile && (
+        <ProfileUpdate
+          user={user}
+          onClose={() => setShowEditProfile(false)}
+          onUpdate={handleProfileUpdate}
+        />
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <DeleteConfirmation
+          title="Delete Post"
+          message="Are you sure you want to delete this post? This action cannot be undone."
+          onConfirm={handleDeletePost}
+          onCancel={() => {
+            setShowDeleteConfirm(false);
+            setSelectedPost(null);
+          }}
+        />
+      )}
+    </div>
+  );
+};
+
+export default Profile;

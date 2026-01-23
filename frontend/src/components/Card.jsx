@@ -1,65 +1,45 @@
-import React, { useState } from "react";
-import ProductPopup from "./ProductPopup";
+import { IoLocationSharp } from "react-icons/io5";
 
-const Card = ({ product }) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+const Card = ({ product, onClick }) => {
+  const imageUrl =
+    product.photo && product.photo.length > 0
+      ? product.photo[0]
+      : "https://via.placeholder.com/300x200?text=No+Image";
 
   return (
-    <>
-      <div 
-        className="w-72 rounded-xl overflow-hidden bg-white shadow-md hover:shadow-xl transition cursor-pointer"
-        onClick={() => setIsModalOpen(true)}
-      >
-        <div className="h-44 bg-gray-100 relative group">
+    <div
+      onClick={onClick}
+      className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden group"
+    >
+      {/* Image */}
+      <div className="relative h-48 overflow-hidden">
         <img
-          src={product.photo?.[0] || "https://via.placeholder.com/300"}
+          src={imageUrl}
           alt={product.title}
-          className="h-full w-full object-cover"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         />
-        {/* Hover Overlay with Description */}
-        
+        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
       </div>
 
-      <div className="p-4 space-y-2">
-        <p className="text-sm text-gray-600">
-          <strong>{product.title}</strong>
+      {/* Content */}
+      <div className="p-4">
+        <h3 className="font-semibold text-gray-800 text-lg truncate">
+          {product.title}
+        </h3>
+        <p className="text-gray-500 text-sm mt-1 line-clamp-2">
+          {product.content}
         </p>
 
-        <p className="text-lg font-semibold text-gray-900">
-          Rs. {product.price || "N/A"}
-        </p>
-
-        <div className="flex items-center justify-between pt-2">
-          <div className="flex items-center gap-2">
-            <div className="h-10 w-10 rounded-full overflow-hidden border bg-indigo-100 flex items-center justify-center">
-              <span className="text-sm font-medium text-indigo-600">
-                {typeof product.author === 'string' ? product.author.charAt(0).toUpperCase() : 'U'}
-              </span>
-            </div>
-            <span className="text-sm font-medium text-gray-700">
-              {product.locations?.[0] || "Location"}
+        <div className="flex items-center justify-between mt-3">
+          <div className="flex items-center gap-1 text-gray-500 text-sm">
+            <IoLocationSharp className="text-indigo-500" />
+            <span className="truncate max-w-[100px]">
+              {product.locations || "Unknown"}
             </span>
           </div>
-
-          <button 
-            className="px-4 py-1.5 text-sm font-medium rounded-lg bg-indigo-600 text-white hover:bg-indigo-700"
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsModalOpen(true);
-            }}
-          >
-            Buy
-          </button>
         </div>
       </div>
     </div>
-
-      <ProductPopup 
-        product={product}
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-      />
-    </>
   );
 };
 

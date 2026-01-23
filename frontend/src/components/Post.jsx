@@ -1,190 +1,257 @@
-import React, { useState, useRef } from "react";
-import api from "../apicentralize";
-import { useAuth } from "../auth/useAuth";
+import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { MdCloudUpload, MdClose } from "react-icons/md";
+import api from "../api";
 
 const Post = () => {
-  const { isAuthenticated, loading, user } = useAuth();
-
-  const textareaRef = useRef(null);
+  const navigate = useNavigate();
   const fileInputRef = useRef(null);
+  const textareaRef = useRef(null);
 
-  const [item_name, setItemName] = useState("");
-  const [image, setImage] = useState(null);
-  const [description, setDescription] = useState("");
-  const [price, setPrice] = useState("");
-  const [location, setLocation] = useState("");
-  const [preview, setPreview] = useState(null);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
+  const [form, setForm] = useState({
+    title: "",
+    content: "",
+    location: "",
+  });
+  const [image, setImage] = useState(null);
+  const [preview, setPreview] = useState(null);
+
+  // Fetch user profile on mount
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await api.get("/api/v1/tradelink/profile");
+        setUser(res.data.user);
+      } catch (err) {
+        if (err.response?.status === 401) {
+          navigate("/login");
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProfile();
+  }, [navigate]);
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
   const autoResize = () => {
-    const size = textareaRef.current;
-    size.style.height = "auto";
-    size.style.height = size.scrollHeight + "px";
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height = textareaRef.current.scrollHeight + "px";
+    }
   };
 
-  const chooseImage = () => {
-    fileInputRef.current.click();
-  };
-
-  const changeImage = (e) => {
+  const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      setError("Please select an image file");
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setError("Image size should be less than 5MB");
+      return;
+    }
+
     setImage(file);
     setPreview(URL.createObjectURL(file));
+    setError("");
   };
 
-  const submit = async (e) => {
+  const removeImage = () => {
+    setImage(null);
+    setPreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
 
-    if (!isAuthenticated) {
-      alert("You must be logged in to post an item.");
+    if (!form.title.trim()) {
+      setError("Please enter a title");
       return;
     }
 
-    if (!item_name || !price || !image || !location) {
-      alert("Please fill in all fields and select an image.");
+    if (!form.content.trim()) {
+      setError("Please enter a description");
       return;
     }
 
-    if (!user?._id) {
-      alert("User information not available. Please login again.");
+    if (!form.location.trim()) {
+      setError("Please enter a location");
       return;
     }
 
-    const form_data = new FormData();
-    form_data.append("title", item_name);
-    form_data.append("content", description);
-    form_data.append("author", user._id);
-    form_data.append("locations", location);
-    form_data.append("file", image);
+    if (!image) {
+      setError("Please upload an image");
+      return;
+    }
 
+    const formData = new FormData();
+    formData.append("title", form.title.trim());
+    formData.append("content", form.content.trim());
+    formData.append("locations", form.location.trim());
+    formData.append("author", user?.username || "anonymous");
+    formData.append("file", image);
+
+    setSubmitting(true);
     try {
-      setSubmitting(true);
-
-      const res = await api.post("/api/v1/tradelink/post", form_data, {
+      const res = await api.post("/api/v1/tradelink/post", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
 
-      if (res.status === 201 || res.status === 200) {
+      if (res.data.success) {
         alert("Item posted successfully!");
-        setItemName("");
+        setForm({ title: "", content: "", location: "" });
         setImage(null);
-        setDescription("");
-        setPrice("");
-        setLocation("");
         setPreview(null);
+        navigate("/home/explore");
       }
     } catch (err) {
-      console.error("Upload error:", err);
-      alert(
-        err.response?.data?.message ||
-          "Failed to upload item. Please try again."
-      );
+      setError(err.response?.data?.message || "Failed to post item");
     } finally {
       setSubmitting(false);
     }
   };
 
   if (loading) {
-    return <div className="text-center mt-10">Checking authentication…</div>;
+    return (
+      <div className="flex items-center justify-center h-[60vh]">
+        <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-[88vh] flex items-center justify-center bg-gray-100">
-      <div className="w-full max-w-xl bg-white rounded-2xl shadow-xl p-8 space-y-6">
-        <h2 className="text-2xl font-semibold text-gray-800">Create Post</h2>
+    <div className="max-w-2xl mx-auto">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-800">Create New Post</h1>
+        <p className="text-gray-500 mt-1">Share your item with the community</p>
+      </div>
 
-        {/* Image upload */}
-        <div className="flex items-center gap-6">
-          <div className="h-34 w-34 rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400 text-sm overflow-hidden">
-            {preview && (
-              <img
-                src={preview}
-                alt="preview"
-                className="w-full h-full object-cover rounded-xl"
-              />
-            )}
+      <div className="bg-white rounded-2xl shadow-sm p-6">
+        {error && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-red-600 text-sm">{error}</p>
           </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Image Upload */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Product Image *
+            </label>
+
+            {preview ? (
+              <div className="relative inline-block">
+                <img
+                  src={preview}
+                  alt="Preview"
+                  className="w-40 h-40 object-cover rounded-xl border-2 border-gray-200"
+                />
+                <button
+                  type="button"
+                  onClick={removeImage}
+                  className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition cursor-pointer"
+                >
+                  <MdClose className="text-lg" />
+                </button>
+              </div>
+            ) : (
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                className="w-40 h-40 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-indigo-500 hover:bg-indigo-50 transition"
+              >
+                <MdCloudUpload className="text-4xl text-gray-400" />
+                <span className="text-sm text-gray-500 mt-2">Upload Image</span>
+              </div>
+            )}
+
+            <input
+              type="file"
+              ref={fileInputRef}
+              accept="image/*"
+              onChange={handleImageChange}
+              className="hidden"
+            />
+          </div>
+
+          {/* Title */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Item Name *
+            </label>
+            <input
+              type="text"
+              name="title"
+              value={form.title}
+              onChange={handleChange}
+              placeholder="What are you selling?"
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+            />
+          </div>
+
+          {/* Description */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Description *
+            </label>
+            <textarea
+              ref={textareaRef}
+              name="content"
+              value={form.content}
+              onChange={(e) => {
+                handleChange(e);
+                autoResize();
+              }}
+              placeholder="Describe your item in detail..."
+              rows={4}
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition resize-none"
+            />
+          </div>
+
+          {/* Location */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Location *
+            </label>
+            <input
+              type="text"
+              name="location"
+              value={form.location}
+              onChange={handleChange}
+              placeholder="Where is this item located?"
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+            />
+          </div>
+
+          {/* Submit */}
           <button
-            type="button"
-            className="px-6 py-3 text-base bg-gray-800 text-white rounded-xl hover:bg-gray-700"
-            onClick={chooseImage}
+            type="submit"
+            disabled={submitting}
+            className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white rounded-xl font-semibold transition cursor-pointer disabled:cursor-not-allowed"
           >
-            Choose Image
+            {submitting ? "Posting..." : "Post Item"}
           </button>
-          <input
-            type="file"
-            accept="image/*"
-            hidden
-            ref={fileInputRef}
-            onChange={changeImage}
-          />
-        </div>
-
-        {/* Name */}
-        <div className="flex flex-col gap-2">
-          <label className="text-base text-gray-800">Item Name</label>
-          <input
-            type="text"
-            placeholder="Item Name"
-            value={item_name}
-            onChange={(e) => setItemName(e.target.value)}
-            className="border border-gray-300 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        {/* Description */}
-        <div className="flex flex-col gap-2">
-          <label className="text-base text-gray-800">
-            Product Description
-          </label>
-          <textarea
-            ref={textareaRef}
-            rows={2}
-            onChange={(e) => {
-              setDescription(e.target.value);
-              autoResize();
-            }}
-            placeholder="Enter description"
-            value={description}
-            className="border border-gray-300 resize-none rounded-xl px-4 py-3 overflow-hidden text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        {/* Price */}
-        <div className="flex flex-col gap-2">
-          <label className="text-base text-gray-800">Price</label>
-          <input
-            type="text"
-            placeholder="e.g. 1200"
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-            className="border border-gray-300 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        {/* Location */}
-        <div className="flex flex-col gap-2">
-          <label className="text-base text-gray-800">Location</label>
-          <input
-            type="text"
-            placeholder="e.g. New York"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            className="border border-gray-300 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        {/* Post button */}
-        <button
-          onClick={submit}
-          disabled={submitting}
-          className="w-full py-3 text-lg bg-amber-600 text-white rounded-xl font-semibold hover:bg-amber-700 disabled:opacity-50"
-        >
-          {submitting ? "Posting…" : "Post"}
-        </button>
+        </form>
       </div>
     </div>
   );

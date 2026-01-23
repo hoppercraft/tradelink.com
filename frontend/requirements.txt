@@ -1,8 +1,0 @@
-react
-react-dom
-react-router-dom
-axios
-jwt-decode
-react-icons
-tailwindcss
-@tailwindcss/vite

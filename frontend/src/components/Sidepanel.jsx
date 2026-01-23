@@ -1,66 +1,47 @@
-import React from "react";
 import { NavLink } from "react-router-dom";
+import { MdExplore, MdAddBox, MdHelp, MdChat, MdPerson } from "react-icons/md";
 
-const linkClass =
-  "block px-4 py-2 font-medium transition-colors";
+const navItems = [
+  { path: "/home/explore", icon: MdExplore, label: "Explore" },
+  { path: "/home/post", icon: MdAddBox, label: "Post Item" },
+  { path: "/home/chat", icon: MdChat, label: "Messages" },
+  { path: "/home/profile", icon: MdPerson, label: "Profile" },
+  { path: "/home/help", icon: MdHelp, label: "Help" },
+];
 
-const SidePanel = () => {
+const Sidepanel = () => {
   return (
-    <aside className="fixed top-16 left-0 bottom-0 w-64 bg-gray-900 text-gray-100 shadow-lg">
-      <div className="pt-5 pb-5">
-        <h3 className="text-sm uppercase tracking-wider text-gray-400 mb-6 mx-4">
-          Navigation
-        </h3>
+    <aside className="fixed left-0 top-16 bottom-0 w-64 bg-white border-r border-gray-200 p-4">
+      <nav className="space-y-2">
+        {navItems.map((item) => (
+          <NavLink
+            key={item.path}
+            to={item.path}
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-4 py-3 rounded-xl transition font-medium ${
+                isActive
+                  ? "bg-indigo-50 text-indigo-600"
+                  : "text-gray-600 hover:bg-gray-50"
+              }`
+            }
+          >
+            <item.icon className="text-xl" />
+            <span>{item.label}</span>
+          </NavLink>
+        ))}
+      </nav>
 
-        <ul className="space-y-2">
-          <li>
-            <NavLink
-              to="/home/explore"
-              className={({ isActive }) =>
-                `${linkClass} ${isActive? "bg-indigo-600 text-white"  : "hover:bg-gray-800"}`}>
-              Explore
-            </NavLink>
-          </li>
-
-          <li>
-            <NavLink
-              to="/home/profile"
-              className={({ isActive }) =>
-                `${linkClass} ${ isActive? "bg-indigo-600 text-white": "hover:bg-gray-800"}`}>
-              Profile
-            </NavLink>
-          </li>
-
-          <li>
-            <NavLink
-              to="/home/post"
-              className={({ isActive }) =>
-                `${linkClass} ${ isActive? "bg-indigo-600 text-white": "hover:bg-gray-800"}`}>
-              Post Items
-            </NavLink>
-          </li>
-
-           <li>
-            <NavLink
-              to="/home/chat"
-              className={({ isActive }) =>
-                `${linkClass} ${ isActive? "bg-indigo-600 text-white": "hover:bg-gray-800"}`}>
-              Chats
-            </NavLink>
-          </li>
-
-          <li>
-            <NavLink
-              to="/home/help"
-              className={({ isActive }) =>
-                `${linkClass} ${isActive? "bg-indigo-600 text-white": "hover:bg-gray-800"}`}>
-              Help & Report
-            </NavLink>
-          </li>
-        </ul>
+      {/* Footer info */}
+      <div className="absolute bottom-4 left-4 right-4">
+        <div className="p-4 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl text-white">
+          <h4 className="font-semibold mb-1">TradeLink Pro</h4>
+          <p className="text-xs text-indigo-100">
+            Your marketplace for trading items
+          </p>
+        </div>
       </div>
     </aside>
   );
 };
 
-export default SidePanel;
+export default Sidepanel;
