@@ -37,8 +37,7 @@ const createPost = asyncHandler(async (req, res) => {
         locations: locations.trim(),
         photo: [uploadedImageUrl]
     }); 
-
-   
+    await newPost.save(); 
     res.status(201).json({
         success: true,
         data: newPost
@@ -54,9 +53,9 @@ const getPosts = asyncHandler(async (req, res) => {
 });
 
 const deletePost = asyncHandler(async (req, res) => {
-    const { postId } = req.params;
+    const { id } = req.params;
 
-    const post = await Post.findById(postId);
+    const post = await Post.findById(id);
 
     if (!post) {
         return res.status(404).json({
@@ -65,7 +64,7 @@ const deletePost = asyncHandler(async (req, res) => {
         });
     }
 
-    await Post.findByIdAndDelete(postId);
+    await Post.findByIdAndDelete(id);
 
     res.status(200).json({
         success: true,
