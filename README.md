@@ -2,7 +2,17 @@
 
 A full-stack web application for trading products built with React (Frontend) and Express.js + MongoDB (Backend).
 
+
+## Working
+## author
+Prabin K.C.
+kcprabin2063@gmail.com
+
 ## Features
+
+https://github.com/user-attachments/assets/cef83155-4c95-46f7-a3da-2d795603f11d
+
+
 
 - User Authentication (Register/Login/Logout)
 - Create and Post Products/Items
