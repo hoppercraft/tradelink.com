@@ -3,8 +3,9 @@ import { Post } from "../model/post.model.js";
 import { uploadOnCloudinary } from "../service/cloudninary.service.js";
 
 const createPost = asyncHandler(async (req, res) => {
-
-    const { title, content, author, locations } = req.body;
+    const author = req.user.username;
+    console.log("Author:", author);
+    const { title, content, locations } = req.body;
 
     if(!title?.trim() || !content?.trim() || !author.trim() || !locations) {
         return res.status(400).json({

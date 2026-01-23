@@ -96,6 +96,22 @@ export const Authprovider = ({ children }) => {
     }
   };
 
+  const updateProfilePhoto = async (photoFile) => {
+    try {
+      const formData = new FormData();
+      formData.append("photo", photoFile);
+      
+      await api.put("/api/v1/tradelink/update-profile-photo", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      // Refresh user data
+      const userRes = await api.get("/api/v1/tradelink/profile");
+      setUser(userRes.data.user);
+    } catch (err) {
+      throw new Error(err.response?.data?.message || "Photo upload failed");
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{ 
@@ -107,7 +123,8 @@ export const Authprovider = ({ children }) => {
         logout, 
         updateUser,
         changePassword,
-        deleteAccount
+        deleteAccount,
+        updateProfilePhoto
       }}
     >
       {children}

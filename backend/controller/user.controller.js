@@ -1,5 +1,6 @@
 import { asyncHandler } from "../utils/aynchandler.utils.js";
 import { User } from "../model/user.model.js";
+import { uploadOnCloudinary } from "../service/cloudninary.service.js";
 
 
 const registerUser = asyncHandler(async (req, res) => {
@@ -120,6 +121,35 @@ const updateProfile = asyncHandler(async (req, res) => {
     await user.save();
     res.status(200).json({ message: "Profile updated successfully" });
 });
+const updateProfilePhoto = asyncHandler(async (req, res) => {
+    const userId = req.user.userId;
+    const photo = req.file?.path;
+    
+    if(!photo) {
+        return res.status(400).json({ message: "Photo is required" });
+    }
+    
+    let uploadedUrl;
+    try {
+        uploadedUrl = await uploadOnCloudinary(photo);
+    } catch (error) {
+        console.error("Cloudinary upload error:", error);
+        return res.status(500).json({ message: "Photo upload failed" }); 
+    }
+    
+    if (!uploadedUrl) {
+        return res.status(500).json({ message: "Photo upload failed" });
+    }
+    
+    const user = await User.findById(userId);   
+    if (!user) {
+        return res.status(404).json({ message: "User not found" });
+    }
+
+    user.photo = uploadedUrl;
+    await user.save();
+    res.status(200).json({ message: "Profile photo updated successfully" });
+});
 
 const deleteUser = asyncHandler(async (req, res) => {
     const userId = req.user.userId;
@@ -143,4 +173,10 @@ const deleteUser = asyncHandler(async (req, res) => {
     res.status(200).json({ message: "User deleted successfully" }); 
 });
 
-export { registerUser,loginUser , logoutUser, getProfile, changePassword , updateProfile ,deleteUser};
+export { registerUser,
+        loginUser ,
+         logoutUser,
+          getProfile,
+           changePassword ,
+            updateProfile ,
+            deleteUser, updateProfilePhoto};
