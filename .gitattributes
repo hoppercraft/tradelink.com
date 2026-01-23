@@ -1,8 +1,0 @@
-# Prevent merge conflicts on binary files
-*.sqlite3 binary
-*.db binary
-*.pyc binary
-
-# Prevent merge conflicts on lock files
-package-lock.json binary
-yarn.lock merge=binary
