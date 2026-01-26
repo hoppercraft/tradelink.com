@@ -6,13 +6,13 @@ import { DetailProvider } from "../context-products/detail_product";
 function Home() {
   return (
     <>
+     <DetailProvider>
       <Header />
       <SidePanel />
       <main className="ml-64 pt-18 p-4">
-        <DetailProvider>
           <Outlet />
-        </DetailProvider>
       </main>
+      </DetailProvider>
     </>
   );
 }
