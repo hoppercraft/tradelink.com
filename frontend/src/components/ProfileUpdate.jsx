@@ -1,5 +1,7 @@
 import { useRef, useState } from "react";
 import { useAuth } from "../auth/useAuth.js";
+import defaultUser from '../assets/default-avatar.jpg';
+import api from "../apicentralize";
 
 const ProfileUpdate = ({ close }) => {
   const authContext = useAuth();
@@ -10,8 +12,9 @@ const ProfileUpdate = ({ close }) => {
 
   const [form, setForm] = useState({
     username: user?.username || "Guest User",
-    information: user?.information || "No information yet",
-    profilepic: null
+    email:user?.email || "N.A.",
+    phone:user?.phone||"N.A.",
+    avatar: user?.avatar||defaultUser
   });
 
   const chooseImage = () => fileInputRef.current.click();
@@ -19,7 +22,7 @@ const ProfileUpdate = ({ close }) => {
   const changeImage = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    setForm({ ...form, profilepic: file });
+    setForm({ ...form, avatar: file });
     
     // Create preview URL
     const reader = new FileReader();
@@ -32,19 +35,25 @@ const ProfileUpdate = ({ close }) => {
   const submit = async () => {
     const formData = new FormData();
     formData.append("username", form.username);
-    formData.append("information", form.information);
+    formData.append("email", form.email);
+    formData.append("phone", form.phone);
 
-    if (form.profilepic) {
-      formData.append("profilepic", form.profilepic);
-    }
+    if (form.avatar instanceof File) {
+    formData.append("avatar", form.avatar);
+  }
 
-    // Call updateUser if available (when backend is ready)
-    if (updateUser) {
-      await updateUser(formData);
-    } else {
-      console.log("Profile update (UI only):", form);
+    try {
+      await api.patch("api/me/update/", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      
+      console.log("Profile updated successfully!");
+      close();
+    } catch (err) {
+      console.error("Failed to update profile:", err);
     }
-    close();
   };
 
   return (
@@ -62,19 +71,20 @@ const ProfileUpdate = ({ close }) => {
 
         {/* Image upload */}
         <div className="flex items-center gap-6">
+          <img
+            src={imagePreview || form.avatar || defaultUser}
+            alt="Profile"
+            className="w-20 h-20 rounded-full object-cover border-2 border-gray-300"
+          />
           <button
             onClick={chooseImage}
             className="px-6 py-3 bg-gray-800 text-white rounded-xl"
           >
             Choose Image
           </button>
-          {imagePreview && (
-            <img
-              src={imagePreview}
-              alt="Preview"
-              className="w-20 h-20 rounded-full object-cover border-2 border-gray-300"
-            />
-          )}
+          
+          
+          
           <input
             type="file"
             accept="image/*"
@@ -95,18 +105,29 @@ const ProfileUpdate = ({ close }) => {
             className="border rounded-xl px-4 py-3"
           />
         </div>
-
-        {/* Information */}
+          
         <div className="flex flex-col gap-2">
-          <label>Information</label>
+          <label>Email</label>
           <input
-            value={form.information}
+            value={form.email}
             onChange={e =>
-              setForm({ ...form, information: e.target.value })
+              setForm({ ...form, email: e.target.value })
             }
             className="border rounded-xl px-4 py-3"
           />
         </div>
+
+        <div className="flex flex-col gap-2">
+          <label>Phone no.</label>
+          <input
+            value={form.phone}
+            onChange={e =>
+              setForm({ ...form, phone: e.target.value })
+            }
+            className="border rounded-xl px-4 py-3"
+          />
+        </div>
+        
 
         <button
           onClick={submit}

@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.contrib.auth import get_user_model
-
+from rest_framework.parsers import MultiPartParser, FormParser
 User = get_user_model()
 
 from rest_framework import generics
@@ -15,7 +15,13 @@ class ItemListCreate(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return Item.objects.all()
+        queryset = Item.objects.all()
+        mine = self.request.query_params.get("mine")
+
+        if mine == "true":
+            queryset = queryset.filter(owner=self.request.user)
+
+        return queryset
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
@@ -41,3 +47,13 @@ class MeView(APIView):
     def get(self, request):
         serializer = UserSerializer(request.user)
         return Response(serializer.data)
+    
+
+class UpdateMeView(generics.UpdateAPIView):
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+    def get_object(self):
+        return self.request.user
+    
+    

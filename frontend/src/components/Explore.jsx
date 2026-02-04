@@ -1,8 +1,15 @@
 import Card from "./Card";
 import { useDetail } from "../context-products/getDetail";
+import { useEffect } from "react";
 
 const Explore = () => {
-  const { displayProducts } = useDetail();
+  const { displayProducts,fetchProducts } = useDetail();
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  
 if(displayProducts.length>0){
   return (
     <div className="flex flex-row flex-wrap gap-4 bg-gray-100 p-7">
