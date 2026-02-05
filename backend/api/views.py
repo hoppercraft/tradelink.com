@@ -26,6 +26,15 @@ class ItemListCreate(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
 
+
+class ItemUpdate(generics.UpdateAPIView):
+    serializer_class = ItemSerializer
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+
+    def get_queryset(self):
+        return Item.objects.filter(owner=self.request.user)
+    
 class ItemDelete(generics.DestroyAPIView):
     serializer_class=ItemSerializer
     permission_classes=[IsAuthenticated]
@@ -45,7 +54,7 @@ class MeView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        serializer = UserSerializer(request.user)
+        serializer = UserSerializer(request.user, context={'request': request})
         return Response(serializer.data)
     
 

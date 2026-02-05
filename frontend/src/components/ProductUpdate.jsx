@@ -1,8 +1,17 @@
 import { useRef, useState } from "react";
+import api from "../apicentralize";
+import { useDetail } from "../context-products/getDetail";
 
 const ProductUpdate = ({ close, product }) => {
   const fileInputRef = useRef(null);
-  const [imagePreview, setImagePreview] = useState(product?.image || null);
+  const [imagePreview, setImagePreview] = useState(
+  product?.image
+    ? product.image.startsWith("http")
+      ? product.image
+      : `${import.meta.env.VITE_API_URL}${product.image}`
+    : null
+);
+
 
   const [form, setForm] = useState({
     item_name: product?.item_name || "Product Name",
@@ -26,6 +35,8 @@ const ProductUpdate = ({ close, product }) => {
     reader.readAsDataURL(file);
   };
 
+  const { fetchMyProducts } = useDetail();
+
   const submit = async () => {
     const formData = new FormData();
     formData.append("item_name", form.item_name);
@@ -36,10 +47,23 @@ const ProductUpdate = ({ close, product }) => {
       formData.append("image", form.image);
     }
 
-    //Call backend API when ready
-    console.log("Product update (UI only):", form);
-    close();
+    try {
+      await api.patch(`/api/items/update/${product.id}/`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      // refresh product list
+      await fetchMyProducts();
+
+      close();
+    } catch (err) {
+      console.error("Product update failed:", err);
+      alert("Failed to update product");
+    }
   };
+
 
   return (
     <div

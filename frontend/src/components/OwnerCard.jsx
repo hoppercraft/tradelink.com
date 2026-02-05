@@ -11,8 +11,8 @@ const OwnerCard = ({ product, onEdit, onRemove }) => {
         />
       </div>
       <div className="p-3 space-y-1">
-        <p className="text-xs text-gray-600 line-clamp-2">
-          {product?.description || "Short product description goes here"}
+        <p className="text-sm text-gray-600">
+          <strong>{product?.item_name||"item_name"}</strong>
         </p>
         <p className="text-sm font-semibold text-gray-900">
           Rs. {product?.price || 1200}

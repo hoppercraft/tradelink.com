@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import ProductPopup from "./ProductPopup";
+import defaultUser from '../assets/default-avatar.jpg';
 
 const Card = ({ product }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -35,7 +36,7 @@ const Card = ({ product }) => {
               <>
                 <div className="h-10 w-10 rounded-full overflow-hidden border">
                   <img
-                    src={product.owner.avatar || "https://via.placeholder.com/40"}
+                    src={product.owner.avatar || defaultUser}
                     alt={product.owner.username}
                     className="h-full w-full object-cover"
                   />

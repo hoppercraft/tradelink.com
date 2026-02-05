@@ -64,16 +64,9 @@ export const Authprovider = ({ children }) => {
     setIsAuthenticated(false);
   };
 
-  const updateUser = async (payload) => {
-    try {
-      const res = await api.put("/api/profile", payload, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      setUser(res.data);
-    } catch {
-      return;
-    }
-  };
+  const updateUser = (userData) => {
+    setUser(userData); 
+};
 
   return (
     <AuthContext.Provider

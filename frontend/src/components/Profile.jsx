@@ -11,7 +11,7 @@ import defaultUser from '../assets/default-avatar.jpg';
 
 const Profile = () => {
   const { user } = useAuth();
-  const { displayProducts, fetchMyProducts } = useDetail();
+  const { myProducts, fetchMyProducts, deleteProduct } = useDetail();
 
   const [open, setOpen] = useState(false);
   const [productEditOpen, setProductEditOpen] = useState(false);
@@ -34,10 +34,12 @@ const Profile = () => {
     setDeleteConfirmOpen(true);
   };
 
-  const confirmDelete = () => {
-    // TODO: call backend API to delete product
-    console.log("Delete confirmed for product:", selectedProduct);
-    setSelectedProduct(null);
+  const confirmDelete = async () => {
+    if (selectedProduct) {
+      await deleteProduct(selectedProduct.id);
+      setSelectedProduct(null);
+      setDeleteConfirmOpen(false); 
+    }
   };
 
   return (
@@ -99,12 +101,12 @@ const Profile = () => {
         <div className="md:col-span-4 space-y-3 bg-white p-4 rounded-lg shadow-md">
           <p className="text-xl font-semibold text-gray-800 mb-2">My Shop</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {displayProducts.length === 0 ? (
+            {myProducts.length === 0 ? (
               <p className="text-gray-500 col-span-full">
                 You have no products yet.
               </p>
             ) : (
-              displayProducts.map((product) => (
+              myProducts.map((product) => (
                 <OwnerCard
                   key={product.id}
                   product={product}

@@ -6,6 +6,7 @@ import { AuthContext } from "../auth/useAuth"; // get current user (optional)
 
 export const DetailProvider = ({ children }) => {
   const [products, setProducts] = useState([]);
+  const [myProducts, setMyProducts] = useState([]);
   const { user, isAuthenticated } = useContext(AuthContext);
   const [searchInput,setSearchInput]=useState('');
   const [activeSearch,setActiveSearch]=useState("");
@@ -19,10 +20,22 @@ export const DetailProvider = ({ children }) => {
       console.error("Error fetching products:", err);
     }
   };
+  const deleteProduct = async (id) => {
+  try {
+    await api.delete(`/api/items/delete/${id}/`);
+    
+    setProducts((prev) => prev.filter(product => product.id !== id));
+    setMyProducts((prev) => prev.filter(p => p.id !== id));
+    console.log("Product deleted from database and UI");
+  } catch (err) {
+    console.error("Failed to delete product:", err);
+    alert("Could not delete product. Please try again.");
+  }
+};
   const fetchMyProducts = async () => {
     try{
       const res = await api.get("/api/items/?mine=true");
-      setProducts(res.data);
+      setMyProducts(res.data);
     }catch (err) {
       console.error("Error fetching products:", err);
     }
@@ -47,7 +60,7 @@ export const DetailProvider = ({ children }) => {
 
 
   return (
-    <DetailContext.Provider value={{ products,displayProducts,setSearchInput,fetchProducts,fetchMyProducts,setActiveSearch,searchInput }}>
+    <DetailContext.Provider value={{ products,displayProducts,myProducts,deleteProduct,setSearchInput,fetchProducts,fetchMyProducts,setActiveSearch,searchInput }}>
       {children}
     </DetailContext.Provider>
   );

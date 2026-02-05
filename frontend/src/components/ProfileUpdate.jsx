@@ -43,13 +43,14 @@ const ProfileUpdate = ({ close }) => {
   }
 
     try {
-      await api.patch("api/me/update/", formData, {
+      const res = await api.patch("api/me/update/", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
       
       console.log("Profile updated successfully!");
+      updateUser(res.data);
       close();
     } catch (err) {
       console.error("Failed to update profile:", err);
