@@ -7,4 +7,8 @@ urlpatterns = [
     path("items/delete/<int:pk>/", views.ItemDelete.as_view(), name="delete-item"),
     path("me/", views.MeView.as_view(), name="me"),
     path("me/update/", views.UpdateMeView.as_view(), name="update-me"),
+    path("conversations/", views.ConversationList.as_view(), name="conversation-list"),
+    path("conversations/<int:conversation_id>/messages/", views.MessageListCreate.as_view(), name="message-list-create"),
+    path("conversations/start/", views.StartConversationView.as_view(), name="start-conversation"),
+    path("conversations/<int:conversation_id>/read/", views.mark_as_read),
 ]

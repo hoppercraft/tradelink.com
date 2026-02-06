@@ -1,5 +1,5 @@
 // Profile.jsx
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import OwnerCard from './OwnerCard';
 import NotificationCard from './NotificationCard';
 import { useAuth } from '../auth/useAuth';
@@ -8,9 +8,11 @@ import ProfileUpdate from './ProfileUpdate';
 import ProductUpdate from './ProductUpdate';
 import DeleteConfirmation from './DeleteConfirmation';
 import defaultUser from '../assets/default-avatar.jpg';
+import api from '../apicentralize';
 
 const Profile = () => {
   const { user } = useAuth();
+  const [notifications, setNotifications] = useState([]);
   const { myProducts, fetchMyProducts, deleteProduct } = useDetail();
 
   const [open, setOpen] = useState(false);
@@ -21,8 +23,19 @@ const Profile = () => {
   useEffect(() => {
     if (user) {
       fetchMyProducts();
+      fetchNotifications();
     }
   }, [user]);
+  const fetchNotifications = async () => {
+    try {
+        const res = await api.get("/api/conversations/");
+        // Only show conversations that actually have UNREAD messages
+        const unreadOnly = res.data.filter(conv => conv.unread_messages > 0);
+        setNotifications(unreadOnly);
+    } catch (err) {
+        console.error(err);
+    }
+  };
 
   const handleEditProduct = (product) => {
     setSelectedProduct(product);
@@ -88,12 +101,16 @@ const Profile = () => {
       {/* Main Content */}
       <div className="grid grid-cols-1 md:grid-cols-6 gap-6 px-4 mt-8">
         {/* Notifications */}
-        <div className="md:col-span-2 space-y-3 bg-white p-4 rounded-lg shadow-md">
-          <p className="text-xl font-semibold text-gray-800 mb-2">Notifications</p>
+        <div className="md:col-span-2 space-y-3 bg-white p-4 rounded-lg shadow-md h-fit">
+          <p className="text-xl font-semibold text-gray-800 mb-2">Recent Chats</p>
           <div className="space-y-2">
-            <NotificationCard />
-            <NotificationCard />
-            <NotificationCard />
+            {notifications.length > 0 ? (
+              notifications.map(conv => (
+                <NotificationCard key={conv.id} conversation={conv} />
+              ))
+            ) : (
+              <p className="text-sm text-gray-500 italic">No recent messages.</p>
+            )}
           </div>
         </div>
 

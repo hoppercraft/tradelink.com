@@ -1,10 +1,35 @@
-import React, { useState } from "react";
+import  { useState } from "react";
 import ProductPopup from "./ProductPopup";
 import defaultUser from '../assets/default-avatar.jpg';
+import { useNavigate } from "react-router-dom";
+import api from "../apicentralize";
+import { useAuth } from "../auth/useAuth";
 
 const Card = ({ product }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const handleBuyClick = async (e) => {
+    e.stopPropagation();
 
+    console.log("Buyer:", "ME");
+    console.log("Product owner:", product.owner.id);
+
+    try {
+      const res = await api.post("/api/conversations/start/", {
+        owner_id: product.owner.id
+      });
+
+      navigate("/home/chat", {
+        state: { selectedId: res.data.conversation_id }
+      });
+    } catch (err) {
+      console.error(err.response?.data);
+      alert(err.response?.data?.error || "Server error");
+    }
+  };
+
+  
   return (
     <>
       <div 
@@ -47,16 +72,13 @@ const Card = ({ product }) => {
               </>
             )}
           </div>
-
+          {product.owner.id !== user.id ?( 
           <button 
             className="px-4 py-1.5 text-sm font-medium rounded-lg bg-indigo-600 text-white hover:bg-indigo-700"
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsModalOpen(true);
-            }}
+           onClick={handleBuyClick}
           >
             Buy
-          </button>
+          </button>):(<span className="text-xs text-gray-400">Your product</span>)}
         </div>
       </div>
     </div>
