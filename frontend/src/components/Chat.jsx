@@ -8,11 +8,17 @@ const Chat = () => {
   const [conversations, setConversations] = useState([]);
   const [activeConversation, setActiveConversation] = useState(null);
   const [inputText, setInputText] = useState("");
+   const [searchText, setSearchText] = useState("");
   const messagesEndRef = useRef(null);
   const [messages, setMessages] = useState([]);
 
   // Helper to get the current conversation object for the header
   const activeConv = conversations.find(c => c.id === activeConversation);
+
+  const filteredConversations = conversations.filter(conv =>
+    conv.other_person.name.toLowerCase().includes(searchText.toLowerCase())
+  );
+
 
   // 1. Fetch Conversations
   const fetchConvs = async () => {
@@ -105,7 +111,7 @@ const Chat = () => {
       // Refresh sidebar to show the new "Last Message"
       fetchConvs(); 
     } catch (err) {
-      alert("Message failed to send");
+      alert("Message failed to send",err);
     }
   };
 
@@ -118,12 +124,21 @@ const Chat = () => {
           <input
             type="text"
             placeholder="Search conversations..."
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
         </div>
 
         <div className="flex-1 overflow-y-auto">
-          {conversations.map((conv) => (
+
+             {filteredConversations.length === 0 && (
+            <p className="text-center text-gray-400 py-6 text-sm">
+              No conversations found
+            </p>
+          )}
+
+          {filteredConversations.map((conv) => (
             <div
               key={conv.id}
               onClick={() => setActiveConversation(conv.id)} // Just set state, the useEffect handles the rest
