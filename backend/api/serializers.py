@@ -56,9 +56,17 @@ class ConversationSerializer(serializers.ModelSerializer):
     def get_other_person(self, obj):
         user = self.context['request'].user
         other = obj.participants.exclude(id=user.id).first()
+        
+        if not other:
+            return {"name": "Unknown", "avatar": None}
+
+        avatar_url = None
+        if other.avatar:
+            avatar_url = self.context['request'].build_absolute_uri(other.avatar.url)
+
         return {
             "name": other.username,
-            "avatar": other.avatar.url if hasattr(other, 'avatar') and other.avatar else None
+            "avatar": avatar_url
         }
 
     def get_last_message(self, obj):

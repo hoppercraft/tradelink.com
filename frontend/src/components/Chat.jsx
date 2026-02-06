@@ -136,6 +136,7 @@ const Chat = () => {
                   src={conv.other_person.avatar || defaultUser}
                   alt={conv.other_person.name}
                   className="h-12 w-12 rounded-full border-2 border-indigo-600 flex-shrink-0 object-cover"
+                  onError={(e) => { e.target.src = defaultUser;}}
                 />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1">
