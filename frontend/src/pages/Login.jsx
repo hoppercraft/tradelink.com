@@ -30,7 +30,7 @@ const Login = () => {
       navigate("/home/explore");
     } catch (err) {
       // Display error
-      setLocalError(err.message || "Invalid username or password");
+      setLocalError("Invalid username or password");
     }
   };
 

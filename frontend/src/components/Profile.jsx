@@ -19,7 +19,10 @@ const Profile = () => {
   const [productEditOpen, setProductEditOpen] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
-
+  const sanitize = (val) => {
+    if (!val || val === "null" || val === null) return "";
+    return val;
+  };
   useEffect(() => {
     if (user) {
       fetchMyProducts();
@@ -69,8 +72,10 @@ const Profile = () => {
             {user?.username || "Guest"}
           </p>
           <p className="text-lg text-gray-600 mt-1">
-            Email:{user?.email || "N.A."}<br/>
-            Phone no:{user?.phone || "N.A."}
+            Email:{user?.email || "N.A."}
+          </p>
+          <p className="text-lg text-gray-600 mt-1">
+            Phone no:{sanitize(user?.phone || "N.A.")}
           </p>
         </div>
 

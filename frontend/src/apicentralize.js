@@ -28,30 +28,36 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // If unauthorized and not already retried
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // FIX: Check if the error is a 401 AND it's NOT the login request
+    const isLoginRequest = originalRequest.url.includes("/api/token/");
+
+    if (error.response?.status === 401 && !originalRequest._retry && !isLoginRequest) {
       originalRequest._retry = true;
 
       try {
+        // Use 'api' or 'axios'? 
+        // Note: Using 'axios' (the library) here is safer to avoid infinite loops
         const refreshRes = await axios.post(
-          "/api/token/refresh/",
-          {},
+          `${import.meta.env.VITE_API_URL}/api/token/refresh/`, 
+          { refresh: localStorage.getItem(REFRESH_TOKEN) }, // You need to send the token!
           { withCredentials: true }
         );
 
         const newAccess = refreshRes.data.access;
         localStorage.setItem(ACCESS_TOKEN, newAccess);
 
-        // Update header and retry original request
         originalRequest.headers.Authorization = `Bearer ${newAccess}`;
         return api(originalRequest);
       } catch (refreshError) {
         localStorage.removeItem(ACCESS_TOKEN);
-        window.location.href = "/login"; // force logout
+        localStorage.removeItem(REFRESH_TOKEN);
+        window.location.href = "/login"; 
         return Promise.reject(refreshError);
       }
     }
 
+    // If it WAS a login request (isLoginRequest === true), 
+    // it will skip the logic above and come straight here.
     return Promise.reject(error);
   }
 );

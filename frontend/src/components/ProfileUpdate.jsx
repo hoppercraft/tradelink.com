@@ -9,11 +9,14 @@ const ProfileUpdate = ({ close }) => {
   const updateUser = authContext?.updateUser || null;
   const fileInputRef = useRef(null);
   const [imagePreview, setImagePreview] = useState(null);
-
+  const sanitize = (val) => {
+    if (!val || val === "null" || val === null) return "";
+    return val;
+  };
   const [form, setForm] = useState({
-    username: user?.username || "Guest User",
-    email:user?.email || "N.A.",
-    phone:user?.phone||"N.A.",
+    username: user?.username,
+    email:user?.email ,
+    phone:user?.phone,
     avatar: user?.avatar||defaultUser
   });
 
@@ -110,7 +113,7 @@ const ProfileUpdate = ({ close }) => {
         <div className="flex flex-col gap-2">
           <label>Email</label>
           <input
-            value={form.email}
+            value={sanitize(form?.email)}
             onChange={e =>
               setForm({ ...form, email: e.target.value })
             }
@@ -121,7 +124,7 @@ const ProfileUpdate = ({ close }) => {
         <div className="flex flex-col gap-2">
           <label>Phone no.</label>
           <input
-            value={form.phone}
+            value={sanitize(form.phone)}
             onChange={e =>
               setForm({ ...form, phone: e.target.value })
             }
