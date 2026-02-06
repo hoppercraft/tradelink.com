@@ -33,3 +33,11 @@ class Message(models.Model):
     is_read = models.BooleanField(default=False)
     class Meta:
         ordering = ['timestamp']
+
+class Report(models.Model):
+    reporter = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reports")
+    description = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Report by {self.reporter.username}"

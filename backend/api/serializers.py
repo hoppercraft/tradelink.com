@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Item,Conversation,Message
+from .models import Item,Conversation,Message,Report
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -68,3 +68,8 @@ class ConversationSerializer(serializers.ModelSerializer):
     def get_unread_messages(self, obj):
         user = self.context['request'].user
         return obj.messages.filter(is_read=False).exclude(sender=user).count()
+    
+class ReportSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Report
+        fields = ['id', 'description', 'created_at']

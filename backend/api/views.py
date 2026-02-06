@@ -5,7 +5,7 @@ User = get_user_model()
 from rest_framework import generics,permissions,status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .serializers import UserSerializer,ItemSerializer,ConversationSerializer, MessageSerializer
+from .serializers import UserSerializer,ItemSerializer,ConversationSerializer, MessageSerializer,ReportSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from .models import Item,Message,Conversation
 
@@ -133,3 +133,14 @@ def mark_as_read(request, conversation_id):
     
     print(f"Messages updated: {updated_count}") # Check your terminal for this!
     return Response({"status": "success", "updated": updated_count})
+
+class SubmitReportView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        serializer = ReportSerializer(data=request.data)
+        if serializer.is_valid():
+            # Save the report with the current user as the reporter
+            serializer.save(reporter=request.user)
+            return Response({"message": "Report submitted successfully"}, status=201)
+        return Response(serializer.errors, status=400)

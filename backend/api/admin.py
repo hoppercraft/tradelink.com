@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import User, Item, Conversation, Message
+from .models import User, Item, Conversation, Message,Report
 
 class CustomUserAdmin(UserAdmin):
     fieldsets = UserAdmin.fieldsets + (
@@ -32,3 +32,23 @@ class MessageAdmin(admin.ModelAdmin):
     
     def text_preview(self, obj):
         return obj.text[:30] + "..." if len(obj.text) > 30 else obj.text
+    
+@admin.register(Report)
+class ReportAdmin(admin.ModelAdmin):
+    # Columns to show in the list view
+    list_display = ('id', 'reporter', 'short_description', 'created_at')
+    
+    # Add a sidebar to filter by date
+    list_filter = ('created_at',)
+    
+    # Allow searching by the username or the text of the report
+    search_fields = ('reporter__username', 'description')
+    
+    # Make the date read-only so it can't be tampered with
+    readonly_fields = ('created_at',)
+
+    # Helper function to shorten long descriptions in the list view
+    def short_description(self, obj):
+        return obj.description[:75] + "..." if len(obj.description) > 75 else obj.description
+    
+    short_description.short_description = "Description Preview"
