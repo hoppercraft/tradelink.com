@@ -25,6 +25,11 @@ const Header = () => {
     fetchNotifications();
   }, []);
 
+  const handleNotification=()=>{
+      setUnreadCount(0);
+      navigate("/home/profile");
+  }
+
   const handleSearch = () => {
     setActiveSearch(searchInput);
   };
@@ -65,7 +70,7 @@ const Header = () => {
               ? "text-red-600 animate-pulse shadow-[0_0_8px_red]"
               : "text-gray-600 hover:text-indigo-600"
           }`}
-          onClick={() => navigate("/home/profile")}
+          onClick={() => handleNotification()}
         />
         {unreadCount > 0 && (
           <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-600 rounded-full border-2 border-white"></span>
