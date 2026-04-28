@@ -3,7 +3,7 @@ import axios from "axios";
 import { ACCESS_TOKEN,REFRESH_TOKEN } from "./constants";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "", // or your backend URL
+  baseURL: import.meta.env.VITE_API_URL, 
   headers: {
     "Content-Type": "application/json",
   },
@@ -35,11 +35,9 @@ api.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        // Use 'api' or 'axios'? 
-        // Note: Using 'axios' (the library) here is safer to avoid infinite loops
         const refreshRes = await axios.post(
           `${import.meta.env.VITE_API_URL}/api/token/refresh/`, 
-          { refresh: localStorage.getItem(REFRESH_TOKEN) }, // You need to send the token!
+          { refresh: localStorage.getItem(REFRESH_TOKEN) },
           { withCredentials: true }
         );
 
